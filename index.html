@@ -357,162 +357,97 @@
     </div>
 
     <script>
-        // ==================== SISTEMA DE AUDIO GARANTIZADO ====================
-        // 1. Variables globales
-        let audioContext;
-        let isMusicPlaying = false;
-        let soundsLoaded = false;
-        const soundUrls = {
-            hover: 'https://assets.mixkit.co/sfx/preview/mixkit-interface-hint-notification-911.mp3',
-            click: 'https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3',
-            fanfare: 'https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3'
+        // ============== SISTEMA DE AUDIO MEJORADO ==============
+        
+        // 1. Configuración de audio
+        const audioElements = {
+            bgMusic: new Audio('https://stream.zeno.fm/0r0xa792kwzuv'),
+            hover: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3'),
+            click: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-quick-jump-arcade-game-239.mp3'),
+            fanfare: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3')
         };
-        
-        // 2. Inicialización del audio
-        function initAudioSystem() {
-            // Solución híbrida: Intenta Web Audio API primero, luego HTML5 Audio
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                console.log("Web Audio API inicializada");
-                loadSoundsWithWebAudio();
-            } catch (e) {
-                console.log("Usando HTML5 Audio como respaldo");
-                loadSoundsWithHTML5();
-            }
+
+        // 2. Estado del audio
+        let isMusicPlaying = false;
+        let audioInitialized = false;
+
+        // 3. Inicialización del audio
+        function initAudio() {
+            if (audioInitialized) return;
             
-            setupBackgroundMusic();
-        }
-        
-        // 3. Carga de sonidos con Web Audio API
-        async function loadSoundsWithWebAudio() {
-            try {
-                const responses = await Promise.all([
-                    fetch(soundUrls.hover),
-                    fetch(soundUrls.click),
-                    fetch(soundUrls.fanfare)
-                ]);
-                
-                const arrayBuffers = await Promise.all(responses.map(r => r.arrayBuffer()));
-                const audioBuffers = await Promise.all(
-                    arrayBuffers.map(b => audioContext.decodeAudioData(b))
-                );
-                
-                window.sounds = {
-                    hover: { buffer: audioBuffers[0], html5: new Audio(soundUrls.hover) },
-                    click: { buffer: audioBuffers[1], html5: new Audio(soundUrls.click) },
-                    fanfare: { buffer: audioBuffers[2], html5: new Audio(soundUrls.fanfare) }
-                };
-                
-                soundsLoaded = true;
-                console.log("Sonidos cargados con Web Audio API");
-            } catch (error) {
-                console.error("Error con Web Audio API, usando HTML5 Audio:", error);
-                loadSoundsWithHTML5();
-            }
-        }
-        
-        // 4. Carga de sonidos con HTML5 Audio (respaldo)
-        function loadSoundsWithHTML5() {
-            window.sounds = {
-                hover: { html5: new Audio(soundUrls.hover) },
-                click: { html5: new Audio(soundUrls.click) },
-                fanfare: { html5: new Audio(soundUrls.fanfare) }
-            };
+            // Configurar música de fondo
+            audioElements.bgMusic.loop = true;
+            audioElements.bgMusic.volume = 0.35;
             
-            // Precargar sonidos
-            Object.values(window.sounds).forEach(sound => {
-                sound.html5.preload = "auto";
-                sound.html5.volume = 0.5;
+            // Configurar efectos de sonido
+            Object.values(audioElements).forEach(audio => {
+                audio.preload = 'auto';
             });
             
-            soundsLoaded = true;
-            console.log("Sonidos cargados con HTML5 Audio");
+            audioInitialized = true;
+            console.log("Sistema de audio inicializado");
         }
-        
-        // 5. Función para reproducir sonidos (usa el mejor método disponible)
+
+        // 4. Función para reproducir sonidos
         function playSound(soundName, volume = 0.5) {
-            if (!soundsLoaded || !window.sounds || !window.sounds[soundName]) {
-                console.error("Sonido no disponible:", soundName);
-                return;
-            }
-            
-            const sound = window.sounds[soundName];
+            if (!audioInitialized) return;
             
             try {
-                // Intenta con Web Audio API primero
-                if (audioContext && sound.buffer) {
-                    const source = audioContext.createBufferSource();
-                    const gainNode = audioContext.createGain();
-                    
-                    source.buffer = sound.buffer;
-                    gainNode.gain.value = volume;
-                    
-                    source.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
-                    
-                    source.start(0);
-                    console.log(`Reproduciendo ${soundName} con Web Audio API`);
-                    return;
-                }
+                const audio = audioElements[soundName];
+                audio.currentTime = 0;
+                audio.volume = volume;
                 
-                // Respaldo con HTML5 Audio
-                if (sound.html5) {
-                    sound.html5.currentTime = 0;
-                    sound.html5.volume = volume;
-                    const playPromise = sound.html5.play();
-                    
-                    if (playPromise !== undefined) {
-                        playPromise.catch(e => {
-                            console.error(`Error reproduciendo ${soundName}:`, e);
-                        });
-                    }
-                    console.log(`Reproduciendo ${soundName} con HTML5 Audio`);
+                const playPromise = audio.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log(`Error al reproducir ${soundName}:`, error);
+                    });
                 }
             } catch (error) {
-                console.error(`Error al reproducir ${soundName}:`, error);
+                console.log(`Error en playSound (${soundName}):`, error);
             }
         }
-        
-        // 6. Configuración de música de fondo
-        function setupBackgroundMusic() {
-            const audioElement = new Audio('https://stream.zeno.fm/0r0xa792kwzuv');
-            audioElement.loop = true;
-            audioElement.volume = 0.35;
-            
-            window.bgMusic = audioElement;
-            
-            // Conectar a Web Audio API si está disponible
-            if (audioContext) {
-                const source = audioContext.createMediaElementSource(audioElement);
-                const gainNode = audioContext.createGain();
-                gainNode.gain.value = 0.35;
-                source.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-            }
-        }
-        
-        // 7. Control de música de fondo
+
+        // 5. Control de música de fondo
         function toggleMusic() {
-            if (!window.bgMusic) return;
+            if (!audioInitialized) return;
             
             if (isMusicPlaying) {
-                window.bgMusic.pause();
+                audioElements.bgMusic.pause();
                 document.getElementById('audioControl').innerHTML = '<i class="fas fa-volume-mute"></i>';
             } else {
-                window.bgMusic.play().catch(e => {
-                    console.log("Error al reproducir música:", e);
-                });
+                audioElements.bgMusic.play()
+                    .catch(e => console.log("Error al reanudar música:", e));
                 document.getElementById('audioControl').innerHTML = '<i class="fas fa-volume-up"></i>';
             }
             isMusicPlaying = !isMusicPlaying;
         }
-        
-        // ==================== EVENTOS ====================
+
+        // 6. Inicialización al cargar la página
         document.addEventListener('DOMContentLoaded', () => {
-            // Iniciar sistema de audio
-            initAudioSystem();
+            initAudio();
             
-            // Configurar eventos del enlace Zoom
+            // Activar audio con la primera interacción
+            document.body.addEventListener('click', function firstInteraction() {
+                // Reproducir música de fondo si no está activa
+                if (!isMusicPlaying) {
+                    audioElements.bgMusic.play()
+                        .then(() => {
+                            isMusicPlaying = true;
+                            document.getElementById('audioControl').innerHTML = '<i class="fas fa-volume-up"></i>';
+                        })
+                        .catch(e => console.log("Error al iniciar música:", e));
+                }
+                
+                // Eliminar este event listener
+                document.body.removeEventListener('click', firstInteraction);
+            }, { once: true });
+            
+            // Control de música
+            document.getElementById('audioControl').addEventListener('click', toggleMusic);
+            
+            // Eventos para el enlace Zoom
             const zoomLink = document.getElementById('zoomLink');
             
             // Sonido al hacer hover
@@ -530,24 +465,9 @@
                     window.open(zoomLink.href, '_blank');
                 }, 300);
             });
-            
-            // Control de música
-            document.getElementById('audioControl').addEventListener('click', toggleMusic);
-            
-            // Forzar inicialización de audio con la primera interacción
-            document.body.addEventListener('click', function initAudioOnInteraction() {
-                if (audioContext && audioContext.state === 'suspended') {
-                    audioContext.resume().then(() => {
-                        console.log("AudioContext activado");
-                    });
-                }
-                
-                // Eliminar este event listener después de usarlo
-                document.body.removeEventListener('click', initAudioOnInteraction);
-            }, { once: true });
         });
-        
-        // ==================== CUENTA REGRESIVA ====================
+
+        // ============== CUENTA REGRESIVA ==============
         const daysEl = document.getElementById('days');
         const hoursEl = document.getElementById('hours');
         const minutesEl = document.getElementById('minutes');
@@ -595,9 +515,7 @@
                 
                 setTimeout(() => clearInterval(celebrationInterval), 10000);
                 
-                if (window.bgMusic) {
-                    window.bgMusic.volume = 0.6;
-                }
+                audioElements.bgMusic.volume = 0.6;
             }
         }
         
