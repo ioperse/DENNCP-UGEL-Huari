@@ -329,23 +329,24 @@
                         <td>Uso pedagógico de la herramienta de inteligencia artificial (IA) prompts para el desarrollo de las competencias comunicativas</td>
                         <td>Primaria/Secundaria</td>
                     </tr>
-                    </tr>
+                    <tr>
                         <td>25/06/2025</td>
                         <td>15:00</td>
                         <td>Uso pedagógico de la APP Octostudio para producción de textos</td>
                         <td>Primaria/Secundaria</td>
                     </tr>
-                    </tr>
+                    <tr>
                         <td>02/07/2025</td>
                         <td>15:00</td>
                         <td>Uso pedagógico de Rodocodo y Octostudio para el logro de competencias comunicativas</td>
                         <td>Primaria/Secundaria</td>
                     </tr>
-                    </tr>
+                    <tr>
                         <td>09/07/2025</td>
                         <td>15:00</td>
                         <td>Uso pedagógico de Khanmigo para crear actividades orientadas al desarrollo de los aprendizajes de los estudiantes</td>
                         <td>Primaria/Secundaria</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -365,9 +366,9 @@
         Tu navegador no soporta el elemento de audio.
     </audio>
 
-    <!-- Audio para el efecto de agua al hacer clic en Zoom -->
-    <audio id="waterSound">
-        <source src="https://assets.mixkit.co/sfx/preview/mixkit-water-sci-fi-bleep-902.mp3" type="audio/mpeg">
+    <!-- Audio para el efecto hover y click en el enlace Zoom -->
+    <audio id="hoverSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" type="audio/mpeg">
         Tu navegador no soporta el elemento de audio.
     </audio>
 
@@ -385,7 +386,7 @@
         const messageEl = document.getElementById('message');
         const bgMusic = document.getElementById('bgMusic');
         const fanfare = document.getElementById('fanfare');
-        const waterSound = document.getElementById('waterSound');
+        const hoverSound = document.getElementById('hoverSound');
         const audioControl = document.getElementById('audioControl');
         const zoomLink = document.getElementById('zoomLink');
         
@@ -426,12 +427,18 @@
             isMusicPlaying = !isMusicPlaying;
         });
         
-        // Efecto de sonido al hacer clic en el enlace de Zoom
+        // Efecto de sonido al hacer hover y clic en el enlace de Zoom
+        zoomLink.addEventListener('mouseenter', function() {
+            hoverSound.currentTime = 0;
+            hoverSound.volume = 0.3;
+            hoverSound.play().catch(error => console.log("Error al reproducir sonido hover: " + error));
+        });
+        
         zoomLink.addEventListener('click', function(e) {
-            // Reproducir sonido de agua
-            waterSound.currentTime = 0;
-            waterSound.volume = 0.5;
-            waterSound.play().catch(error => console.log("Error al reproducir sonido: " + error));
+            // Reproducir sonido al hacer clic
+            hoverSound.currentTime = 0;
+            hoverSound.volume = 0.5;
+            hoverSound.play().catch(error => console.log("Error al reproducir sonido click: " + error));
             
             // Permitir que el enlace se abra normalmente
             return true;
