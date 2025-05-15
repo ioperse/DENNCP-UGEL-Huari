@@ -217,7 +217,6 @@
             z-index: 1;
         }
 
-        /* Estilos para el control de audio */
         .audio-control {
             position: fixed;
             bottom: 20px;
@@ -234,7 +233,6 @@
             color: white;
         }
     </style>
-    <!-- Font Awesome para el ícono de audio -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -354,134 +352,219 @@
 
     <footer>DRE-Ancash - UGEL Huari | Capacitación Docente 2025</footer>
 
-    <!-- Audio para la música de fondo (radio online) -->
-    <audio id="bgMusic" loop>
-        <source src="https://stream.zeno.fm/0r0xa792kwzuv" type="audio/mpeg">
-        Tu navegador no soporta el elemento de audio.
-    </audio>
-    
-    <!-- Audio para la fanfarria (de Mixkit) -->
-    <audio id="fanfare">
-        <source src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" type="audio/mpeg">
-        Tu navegador no soporta el elemento de audio.
-    </audio>
-
-    <!-- Audio para el efecto del enlace Zoom - ¡VERSIÓN CORREGIDA! -->
-    <audio id="linkSound" preload="auto">
-        <source src="https://assets.mixkit.co/sfx/preview/mixkit-interface-hint-notification-911.mp3" type="audio/mpeg">
-        Tu navegador no soporta el elemento de audio.
-    </audio>
-
-    <!-- Control de audio flotante -->
     <div class="audio-control" id="audioControl">
         <i class="fas fa-volume-up"></i>
     </div>
 
     <script>
-        // Elementos del DOM
+        // ==================== SISTEMA DE AUDIO MEJORADO ====================
+        let audioContext;
+        let isMusicPlaying = false;
+        let audioInitialized = false;
+        let bgMusicSource;
+        
+        // Buffers de audio
+        let hoverSoundBuffer, clickSoundBuffer, fanfareSoundBuffer;
+        
+        // Inicializar el sistema de audio
+        function initAudioSystem() {
+            try {
+                // Crear contexto de audio
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Cargar todos los sonidos
+                loadAllSounds().then(() => {
+                    console.log("Todos los sonidos cargados correctamente");
+                });
+                
+                // Configurar música de fondo
+                setupBackgroundMusic();
+                
+                audioInitialized = true;
+            } catch (error) {
+                console.error("Error inicializando audio:", error);
+            }
+        }
+        
+        // Cargar todos los efectos de sonido
+        async function loadAllSounds() {
+            try {
+                const sounds = await Promise.all([
+                    loadSound('https://assets.mixkit.co/sfx/preview/mixkit-interface-hint-notification-911.mp3'),
+                    loadSound('https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3'),
+                    loadSound('https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3')
+                ]);
+                
+                hoverSoundBuffer = sounds[0];
+                clickSoundBuffer = sounds[1];
+                fanfareSoundBuffer = sounds[2];
+            } catch (error) {
+                console.error("Error cargando sonidos:", error);
+            }
+        }
+        
+        // Función para cargar un sonido
+        async function loadSound(url) {
+            try {
+                const response = await fetch(url);
+                const arrayBuffer = await response.arrayBuffer();
+                return await audioContext.decodeAudioData(arrayBuffer);
+            } catch (error) {
+                console.error("Error cargando el sonido:", url, error);
+                throw error;
+            }
+        }
+        
+        // Configurar música de fondo
+        function setupBackgroundMusic() {
+            const audioElement = new Audio('https://stream.zeno.fm/0r0xa792kwzuv');
+            audioElement.loop = true;
+            bgMusicSource = audioContext.createMediaElementSource(audioElement);
+            
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = 0.35;
+            
+            bgMusicSource.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Guardar referencia al elemento de audio
+            bgMusicSource.mediaElement = audioElement;
+        }
+        
+        // Reproducir efecto de sonido
+        function playSound(buffer, volume = 0.5) {
+            if (!audioInitialized || !buffer) return;
+            
+            try {
+                const source = audioContext.createBufferSource();
+                const gainNode = audioContext.createGain();
+                
+                source.buffer = buffer;
+                gainNode.gain.value = volume;
+                
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                source.start(0);
+                return source;
+            } catch (error) {
+                console.error("Error reproduciendo sonido:", error);
+            }
+        }
+        
+        // Reproducir fanfarria
+        function playFanfare() {
+            playSound(fanfareSoundBuffer, 0.7);
+        }
+        
+        // Control de música
+        function toggleMusic() {
+            if (!audioInitialized) return;
+            
+            if (isMusicPlaying) {
+                bgMusicSource.mediaElement.pause();
+                document.getElementById('audioControl').innerHTML = '<i class="fas fa-volume-mute"></i>';
+            } else {
+                bgMusicSource.mediaElement.play().catch(e => {
+                    console.log("Error al reproducir música:", e);
+                });
+                document.getElementById('audioControl').innerHTML = '<i class="fas fa-volume-up"></i>';
+            }
+            isMusicPlaying = !isMusicPlaying;
+        }
+        
+        // Inicializar con la primera interacción del usuario
+        function handleFirstInteraction() {
+            if (!audioInitialized) {
+                // Algunos navegadores requieren que el AudioContext se inicie dentro de un gesto del usuario
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume().then(() => {
+                        console.log("AudioContext resumido correctamente");
+                    });
+                }
+                
+                initAudioSystem();
+                document.body.removeEventListener('click', handleFirstInteraction);
+            }
+        }
+        
+        // ==================== EVENTOS ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Precargar el sistema de audio
+            initAudioSystem();
+            
+            // Configurar eventos de audio
+            document.body.addEventListener('click', handleFirstInteraction, { once: true });
+            document.getElementById('audioControl').addEventListener('click', toggleMusic);
+            
+            // Eventos para el enlace Zoom
+            const zoomLink = document.getElementById('zoomLink');
+            
+            zoomLink.addEventListener('mouseenter', () => {
+                playSound(hoverSoundBuffer, 0.4);
+            });
+            
+            zoomLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                playSound(clickSoundBuffer, 0.6);
+                setTimeout(() => {
+                    window.open(zoomLink.href, '_blank');
+                }, 300);
+            });
+        });
+        
+        // ==================== CUENTA REGRESIVA ====================
         const daysEl = document.getElementById('days');
         const hoursEl = document.getElementById('hours');
         const minutesEl = document.getElementById('minutes');
         const secondsEl = document.getElementById('seconds');
         const messageEl = document.getElementById('message');
-        const bgMusic = document.getElementById('bgMusic');
-        const fanfare = document.getElementById('fanfare');
-        const linkSound = document.getElementById('linkSound');
-        const audioControl = document.getElementById('audioControl');
-        const zoomLink = document.getElementById('zoomLink');
         
-        // Fecha objetivo: 16 de Mayo 2025 a las 15:00 (GMT-5)
         const targetDate = new Date('May 16, 2025 15:00:00 GMT-0500').getTime();
         
-        // Control de audio
-        let isMusicPlaying = false;
-        let audioInitialized = false;
-        
-        // Función para inicializar audio
-        function initializeAudio() {
-            if (audioInitialized) return;
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
             
-            // Configurar volúmenes
-            bgMusic.volume = 0.35;
-            linkSound.volume = 0.4;
-            fanfare.volume = 0.7;
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
             
-            // Forzar carga de audios
-            linkSound.load();
-            fanfare.load();
+            daysEl.textContent = days.toString().padStart(2, '0');
+            hoursEl.textContent = hours.toString().padStart(2, '0');
+            minutesEl.textContent = minutes.toString().padStart(2, '0');
+            secondsEl.textContent = seconds.toString().padStart(2, '0');
             
-            // "Desbloquear" audio reproduciendo y pausando inmediatamente
-            const playPromise = linkSound.play();
-            if (playPromise !== undefined) {
-                playPromise.then(_ => {
-                    linkSound.pause();
-                    linkSound.currentTime = 0;
-                    audioInitialized = true;
-                }).catch(e => console.log("Audio inicializado"));
-            }
-        }
-        
-        // Función para reproducir música de fondo
-        function startBackgroundMusic() {
-            bgMusic.volume = 0.35;
-            const playPromise = bgMusic.play();
-            
-            if (playPromise !== undefined) {
-                playPromise.then(_ => {
-                    isMusicPlaying = true;
-                    audioControl.innerHTML = '<i class="fas fa-volume-up"></i>';
-                }).catch(e => {
-                    audioControl.innerHTML = '<i class="fas fa-volume-mute"></i>';
-                    isMusicPlaying = false;
+            if (distance < 3600000) {
+                document.querySelectorAll('.countdown-box').forEach(box => {
+                    box.style.background = 'linear-gradient(145deg, #ff0000, #ff6b6b)';
+                });
+            } else if (distance < 86400000) {
+                document.querySelectorAll('.countdown-box').forEach(box => {
+                    box.style.background = 'linear-gradient(145deg, #ff8c00, #ffb347)';
                 });
             }
+            
+            if (distance < 0) {
+                clearInterval(interval);
+                messageEl.style.display = 'block';
+                playFanfare();
+                
+                createConfetti();
+                createFireworks();
+                
+                const celebrationInterval = setInterval(() => {
+                    createConfetti();
+                    createFireworks();
+                }, 1000);
+                
+                setTimeout(() => clearInterval(celebrationInterval), 10000);
+                
+                bgMusicSource.mediaElement.volume = 0.6;
+            }
         }
         
-        // Control manual de audio
-        audioControl.addEventListener('click', function() {
-            if (isMusicPlaying) {
-                bgMusic.pause();
-                audioControl.innerHTML = '<i class="fas fa-volume-mute"></i>';
-            } else {
-                bgMusic.play().catch(e => console.log("Error al reproducir música: " + e));
-                audioControl.innerHTML = '<i class="fas fa-volume-up"></i>';
-            }
-            isMusicPlaying = !isMusicPlaying;
-        });
-        
-        // Inicializar audio con la primera interacción
-        document.body.addEventListener('click', function initAudio() {
-            initializeAudio();
-            startBackgroundMusic();
-            document.body.removeEventListener('click', initAudio);
-        }, { once: true });
-        
-        // Efecto de sonido al hacer hover
-        zoomLink.addEventListener('mouseenter', function() {
-            if (!audioInitialized) return;
-            linkSound.currentTime = 0;
-            linkSound.play().catch(e => console.log("Error en hover:", e));
-        });
-        
-        // Efecto de sonido al hacer clic
-        zoomLink.addEventListener('click', function(e) {
-            if (!audioInitialized) return true;
-            
-            e.preventDefault();
-            linkSound.currentTime = 0;
-            linkSound.play().then(() => {
-                setTimeout(() => {
-                    window.open(zoomLink.href, '_blank');
-                }, 300);
-            }).catch(error => {
-                console.log("Error en click:", error);
-                window.open(zoomLink.href, '_blank');
-            });
-            
-            return false;
-        });
-
-        // Función para crear confeti
         function createConfetti() {
             const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffffff'];
             
@@ -508,7 +591,6 @@
             }
         }
         
-        // Función para crear fuegos artificiales
         function createFireworks() {
             const colors = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#ff00ff'];
             
@@ -533,57 +615,6 @@
                 });
                 
                 setTimeout(() => firework.remove(), 2000);
-            }
-        }
-        
-        // Función principal de la cuenta regresiva
-        function updateCountdown() {
-            const now = new Date().getTime();
-            const distance = targetDate - now;
-            
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            
-            daysEl.textContent = days.toString().padStart(2, '0');
-            hoursEl.textContent = hours.toString().padStart(2, '0');
-            minutesEl.textContent = minutes.toString().padStart(2, '0');
-            secondsEl.textContent = seconds.toString().padStart(2, '0');
-            
-            // Cambiar colores cuando falte poco tiempo
-            if (distance < 3600000) { // Menos de 1 hora
-                document.querySelectorAll('.countdown-box').forEach(box => {
-                    box.style.background = 'linear-gradient(145deg, #ff0000, #ff6b6b)';
-                });
-            } else if (distance < 86400000) { // Menos de 1 día
-                document.querySelectorAll('.countdown-box').forEach(box => {
-                    box.style.background = 'linear-gradient(145deg, #ff8c00, #ffb347)';
-                });
-            }
-            
-            // Cuando la cuenta regresiva termine
-            if (distance < 0) {
-                clearInterval(interval);
-                messageEl.style.display = 'block';
-                
-                // Reproducir fanfarria
-                fanfare.play().catch(e => console.log("Error al reproducir fanfarria: " + e));
-                
-                // Efectos de celebración
-                createConfetti();
-                createFireworks();
-                
-                // Continuar con efectos cada segundo durante 10 segundos
-                const celebrationInterval = setInterval(() => {
-                    createConfetti();
-                    createFireworks();
-                }, 1000);
-                
-                setTimeout(() => clearInterval(celebrationInterval), 10000);
-                
-                // Aumentar volumen de música de fondo
-                bgMusic.volume = 0.6;
             }
         }
         
