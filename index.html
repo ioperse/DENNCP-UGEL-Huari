@@ -216,7 +216,26 @@
             opacity: 0;
             z-index: 1;
         }
+
+        /* Estilos para el control de audio */
+        .audio-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 100;
+        }
+        
+        .audio-control i {
+            font-size: 24px;
+            color: white;
+        }
     </style>
+    <!-- Font Awesome para el ícono de audio -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="main-container">
@@ -327,22 +346,29 @@
                         <td>15:00</td>
                         <td>Uso pedagógico de Khanmigo para crear actividades orientadas al desarrollo de los aprendizajes de los estudiantes</td>
                         <td>Primaria/Secundaria</td>
-            </tbody>
+                </tbody>
             </table>
         </div>
     </div>
 
     <footer>DRE-Ancash - UGEL Huari | Capacitación Docente 2025</footer>
 
-    <!-- Audio para la música de fondo (libre de derechos) -->
+    <!-- Audio para la música de fondo (radio online) -->
     <audio id="bgMusic" loop>
-        <source src=https://www.radio.es/s/swr4bw" type="audio/mpeg">
+        <source src="https://stream.zeno.fm/0r0xa792kwzuv" type="audio/mpeg">
+        Tu navegador no soporta el elemento de audio.
     </audio>
     
-    <!-- Audio para la fanfarria (libre de derechos) -->
+    <!-- Audio para la fanfarria (archivo local) -->
     <audio id="fanfare">
-        <source src="F:\docs de escritorio\musica\Rafo Raez - Los Regalos del Viento (320).mp3" type="audio/mp3">
+        <source src="fanfarria.mp3" type="audio/mpeg">
+        Tu navegador no soporta el elemento de audio.
     </audio>
+
+    <!-- Control de audio flotante -->
+    <div class="audio-control" id="audioControl">
+        <i class="fas fa-volume-up"></i>
+    </div>
 
     <script>
         // Elementos del DOM
@@ -353,16 +379,37 @@
         const messageEl = document.getElementById('message');
         const bgMusic = document.getElementById('bgMusic');
         const fanfare = document.getElementById('fanfare');
+        const audioControl = document.getElementById('audioControl');
         
         // Fecha objetivo: 16 de Mayo 2025 a las 15:00 (GMT-5)
         const targetDate = new Date('May 16, 2025 15:00:00 GMT-0500').getTime();
         
-        // Iniciar música de fondo (volumen bajo)
-        bgMusic.volume = 0.3;
-        // Intentar reproducir música (puede ser bloqueado por algunos navegadores sin interacción del usuario)
+        // Control de audio
+        let isMusicPlaying = false;
+        
+        audioControl.addEventListener('click', function() {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                audioControl.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            } else {
+                bgMusic.play().catch(e => console.log("Error al reproducir música: " + e));
+                audioControl.innerHTML = '<i class="fas fa-volume-up"></i>';
+            }
+            isMusicPlaying = !isMusicPlaying;
+        });
+        
+        // Intentar reproducir música automáticamente (puede ser bloqueado por algunos navegadores)
         document.body.addEventListener('click', function() {
-            bgMusic.play().catch(e => console.log("Error al reproducir música: " + e));
+            if (!isMusicPlaying) {
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    audioControl.innerHTML = '<i class="fas fa-volume-up"></i>';
+                }).catch(e => console.log("Error al reproducir música: " + e));
+            }
         }, { once: true });
+        
+        // Configuración inicial de audio
+        bgMusic.volume = 0.3;
         
         // Función para crear confeti
         function createConfetti() {
