@@ -359,9 +359,9 @@
         Tu navegador no soporta el elemento de audio.
     </audio>
     
-    <!-- Audio para la fanfarria (archivo local) -->
+    <!-- Audio para la fanfarria (de Mixkit) -->
     <audio id="fanfare">
-        <source src="fanfarria.mp3" type="audio/mpeg">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" type="audio/mpeg">
         Tu navegador no soporta el elemento de audio.
     </audio>
 
@@ -397,7 +397,7 @@
         
         // Función para reproducir música automáticamente
         function startBackgroundMusic() {
-            bgMusic.volume = 0.3;
+            bgMusic.volume = 0.35;  // Volumen ajustado a 35%
             const playPromise = bgMusic.play();
             
             if (playPromise !== undefined) {
