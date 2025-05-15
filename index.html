@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Cuenta Regresiva UGEL Huari</title>
+    <title>Capacitación Docente UGEL Huari</title>
     <style>
         body {
             font-family: 'Arial Black', Gadget, sans-serif;
@@ -13,26 +13,57 @@
             margin: 0;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            overflow-x: hidden;
         }
+        
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 900px;
+            width: 100%;
+        }
+        
         .container {
             background: rgba(255,255,255,0.95);
             border-radius: 15px;
             padding: 30px;
-            max-width: 700px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             color: #0a1a3a;
             position: relative;
             z-index: 10;
             border: 3px solid #ffcc00;
         }
+        
+        .countdown-container {
+            width: 100%;
+        }
+        
+        .zoom-container, .schedule-container {
+            width: 100%;
+        }
+        
         h1 {
             color: #1a3a7a;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             margin-bottom: 20px;
+            font-size: 28px;
         }
+        
+        h2 {
+            color: #1a3a7a;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            margin-top: 0;
+            font-size: 24px;
+            background: linear-gradient(to right, #ffcc00, #ffeb3b);
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        
         .countdown {
             display: flex;
             gap: 20px;
@@ -40,6 +71,7 @@
             margin: 30px 0;
             flex-wrap: wrap;
         }
+        
         .countdown-box {
             background: linear-gradient(145deg, #1a3a7a, #2a5298);
             color: white;
@@ -49,12 +81,14 @@
             box-shadow: 0 6px 12px rgba(0,0,0,0.4);
             border: 2px solid #ffcc00;
         }
+        
         .number {
             font-size: 48px;
             font-weight: bold;
             text-shadow: 0 3px 6px rgba(0,0,0,0.5);
             color: #ffffff;
         }
+        
         .label {
             font-size: 16px;
             text-transform: uppercase;
@@ -63,6 +97,7 @@
             font-weight: bold;
             color: #ffcc00;
         }
+        
         .event-date {
             background: linear-gradient(to right, #ff6b6b, #ff8e8e);
             color: #6d1a36;
@@ -75,6 +110,7 @@
             border: 2px solid #ffffff;
             font-size: 18px;
         }
+        
         #message {
             display: none;
             font-size: 36px;
@@ -88,10 +124,80 @@
             border-radius: 10px;
             border: 3px solid #1a3a7a;
         }
+        
         @keyframes pulse {
             from { transform: scale(1); }
             to { transform: scale(1.1); }
         }
+        
+        .zoom-link {
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 18px;
+            margin: 15px 0;
+            display: inline-block;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+        
+        .zoom-link:hover {
+            transform: scale(1.05);
+        }
+        
+        .motivation {
+            font-size: 18px;
+            color: #1a3a7a;
+            font-weight: bold;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 10px;
+            border-left: 5px solid #1a3a7a;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            color: #1a3a7a;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #1a3a7a;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        tr:hover {
+            background-color: #e6f7ff;
+        }
+        
+        footer {
+            margin-top: 20px;
+            font-weight: bold;
+            color: white;
+            font-size: 16px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
         .confetti {
             position: absolute;
             width: 15px;
@@ -100,6 +206,7 @@
             opacity: 0;
             z-index: 1;
         }
+        
         .firework {
             position: absolute;
             width: 8px;
@@ -109,55 +216,106 @@
             opacity: 0;
             z-index: 1;
         }
-        .subtitle {
-            font-size: 18px;
-            font-weight: bold;
-            color: #1a3a7a;
-            margin-bottom: 20px;
-        }
-        footer {
-            margin-top: 20px;
-            font-weight: bold;
-            color: #1a3a7a;
-            font-size: 16px;
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>UGEL HUARI - DIFODS MINEDU</h1>
-        <p class="subtitle">FORTALECIMIENTO DE COMPETENCIAS DIGITALES PARA DOCENTES</p>
-        
-        <div class="event-date">
-            🗓️ Inauguración: 16 de Mayo 2025 - 🕒 15:00 horas
+    <div class="main-container">
+        <div class="container countdown-container">
+            <h1>UGEL HUARI - DIFODS MINEDU</h1>
+            <p style="font-size: 20px; font-weight: bold; color: #1a3a7a;">FORTALECIMIENTO DE COMPETENCIAS DIGITALES PARA DOCENTES</p>
+            
+            <div class="event-date">
+                🗓️ Inauguración: 16 de Mayo 2025 - 🕒 15:00 horas
+            </div>
+            
+            <div class="countdown">
+                <div class="countdown-box">
+                    <div class="number" id="days">00</div>
+                    <div class="label">DÍAS</div>
+                </div>
+                <div class="countdown-box">
+                    <div class="number" id="hours">00</div>
+                    <div class="label">HORAS</div>
+                </div>
+                <div class="countdown-box">
+                    <div class="number" id="minutes">00</div>
+                    <div class="label">MINUTOS</div>
+                </div>
+                <div class="countdown-box">
+                    <div class="number" id="seconds">00</div>
+                    <div class="label">SEGUNDOS</div>
+                </div>
+            </div>
+            
+            <div id="message">
+                ¡BIENVENIDOS! INICIAMOS 🎉
+            </div>
         </div>
         
-        <div class="countdown">
-            <div class="countdown-box">
-                <div class="number" id="days">00</div>
-                <div class="label">DÍAS</div>
-            </div>
-            <div class="countdown-box">
-                <div class="number" id="hours">00</div>
-                <div class="label">HORAS</div>
-            </div>
-            <div class="countdown-box">
-                <div class="number" id="minutes">00</div>
-                <div class="label">MINUTOS</div>
-            </div>
-            <div class="countdown-box">
-                <div class="number" id="seconds">00</div>
-                <div class="label">SEGUNDOS</div>
+        <div class="container zoom-container">
+            <h2>Enlace a la Sala Virtual (Único para todas las sesiones)</h2>
+            <a href="https://us02web.zoom.us/j/83963005690?pwd=THgbSxZJibgnqdSIXVDl9qYYWEq6lY.1" class="zoom-link" target="_blank">
+                🚀 Ingresar a la Sala Zoom de Capacitación
+            </a>
+            <div class="motivation">
+                ¡Domina las herramientas digitales y transforma tu enseñanza! La tecnología es el puente entre el conocimiento y el aprendizaje significativo.
             </div>
         </div>
         
-        <div id="message">
-            ¡BIENVENIDOS! INICIAMOS 🎉
+        <div class="container schedule-container">
+            <h2>Cronograma de Sesiones (Enlace único)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Tema</th>
+                        <th>Nivel</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>16/05/2025</td>
+                        <td>15:00</td>
+                        <td>Uso pedagógico del Genially para elaborar evaluaciones lúdicas con inteligencia artificial IA</td>
+                        <td>Primaria/Secundaria</td>
+                    </tr>
+                    <tr>
+                        <td>23/05/2025</td>
+                        <td>15:00</td>
+                        <td>Uso pedagógico del Sildesgo para elaborar presentaciones y organizadores gráficos orientado a potenciar las competencias comunicativas</td>
+                        <td>Primaria/Secundaria</td>
+                    </tr>
+                    <tr>
+                        <td>30/05/2025</td>
+                        <td>15:00</td>
+                        <td>Uso pedagógico de la app Scratch para desarrollar competencias comunicativas orientada a la creación de historietas y cuentos</td>
+                        <td>Primaria/Secundaria</td>
+                    </tr>
+                    <tr>
+                        <td>04/06/2025</td>
+                        <td>15:00</td>
+                        <td>Uso pedagógico del aplicativo Phet Interactive para el desarrollo de las competencias matemáticas y/o ciencia tecnología</td>
+                        <td>Primaria/Secundaria</td>
+                    </tr>
+                    <tr>
+                        <td>11/06/2025</td>
+                        <td>15:00</td>
+                        <td>Uso pedagógico de Canva en la creación de presentaciones de audio y video con IA para dinamizar las sesiones de aprendizaje</td>
+                        <td>Primaria/Secundaria</td>
+                    </tr>
+                    <tr>
+                        <td>18/06/2025</td>
+                        <td>15:00</td>
+                        <td>Uso pedagógico de la herramienta de inteligencia artificial (IA) prompts para el desarrollo de las competencias comunicativas</td>
+                        <td>Primaria/Secundaria</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        
-        <footer>DRE-Ancash - UGEL Huari<br>
-        Capacitación Docente 2025</footer>
     </div>
+
+    <footer>DRE-Ancash - UGEL Huari | Capacitación Docente 2025</footer>
 
     <!-- Audio para la música de fondo (libre de derechos) -->
     <audio id="bgMusic" loop>
