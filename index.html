@@ -216,24 +216,7 @@
             opacity: 0;
             z-index: 1;
         }
-
-        .audio-control {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.7);
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 100;
-        }
-        
-        .audio-control i {
-            font-size: 24px;
-            color: white;
-        }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="main-container">
@@ -271,7 +254,7 @@
         
         <div class="container zoom-container">
             <h2>Enlace a la Sala Virtual (Único para todas las sesiones)</h2>
-            <a href="https://us02web.zoom.us/j/83963005690?pwd=THgbSxZJibgnqdSIXVDl9qYYWEq6lY.1" class="zoom-link" id="zoomLink" target="_blank">
+            <a href="https://us02web.zoom.us/j/83963005690?pwd=THgbSxZJibgnqdSIXVDl9qYYWEq6lY.1" class="zoom-link" target="_blank">
                 🚀 Ingresar a la Sala Zoom de Capacitación
             </a>
             <div class="motivation">
@@ -327,24 +310,6 @@
                         <td>Uso pedagógico de la herramienta de inteligencia artificial (IA) prompts para el desarrollo de las competencias comunicativas</td>
                         <td>Primaria/Secundaria</td>
                     </tr>
-                    <tr>
-                        <td>25/06/2025</td>
-                        <td>15:00</td>
-                        <td>Uso pedagógico de la APP Octostudio para producción de textos</td>
-                        <td>Primaria/Secundaria</td>
-                    </tr>
-                    <tr>
-                        <td>02/07/2025</td>
-                        <td>15:00</td>
-                        <td>Uso pedagógico de Rodocodo y Octostudio para el logro de competencias comunicativas</td>
-                        <td>Primaria/Secundaria</td>
-                    </tr>
-                    <tr>
-                        <td>09/07/2025</td>
-                        <td>15:00</td>
-                        <td>Uso pedagógico de Khanmigo para crear actividades orientadas al desarrollo de los aprendizajes de los estudiantes</td>
-                        <td>Primaria/Secundaria</td>
-                    </tr>
                 </tbody>
             </table>
         </div>
@@ -352,173 +317,37 @@
 
     <footer>DRE-Ancash - UGEL Huari | Capacitación Docente 2025</footer>
 
-    <div class="audio-control" id="audioControl">
-        <i class="fas fa-volume-up"></i>
-    </div>
+    <!-- Audio para la música de fondo (libre de derechos) -->
+    <audio id="bgMusic" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-inspiring-cinematic-ambient-1165.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- Audio para la fanfarria (libre de derechos) -->
+    <audio id="fanfare">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3" type="audio/mpeg">
+    </audio>
 
     <script>
-        // ============== SISTEMA DE AUDIO MEJORADO ==============
-        
-        // 1. Configuración de audio
-        const audioElements = {
-            bgMusic: new Audio('https://stream.zeno.fm/0r0xa792kwzuv'),
-            hover: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3'),
-            click: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-quick-jump-arcade-game-239.mp3'),
-            fanfare: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3')
-        };
-
-        // 2. Estado del audio
-        let isMusicPlaying = false;
-        let audioInitialized = false;
-
-        // 3. Inicialización del audio
-        function initAudio() {
-            if (audioInitialized) return;
-            
-            // Configurar música de fondo
-            audioElements.bgMusic.loop = true;
-            audioElements.bgMusic.volume = 0.35;
-            
-            // Configurar efectos de sonido
-            Object.values(audioElements).forEach(audio => {
-                audio.preload = 'auto';
-            });
-            
-            audioInitialized = true;
-            console.log("Sistema de audio inicializado");
-        }
-
-        // 4. Función para reproducir sonidos
-        function playSound(soundName, volume = 0.5) {
-            if (!audioInitialized) return;
-            
-            try {
-                const audio = audioElements[soundName];
-                audio.currentTime = 0;
-                audio.volume = volume;
-                
-                const playPromise = audio.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.log(`Error al reproducir ${soundName}:`, error);
-                    });
-                }
-            } catch (error) {
-                console.log(`Error en playSound (${soundName}):`, error);
-            }
-        }
-
-        // 5. Control de música de fondo
-        function toggleMusic() {
-            if (!audioInitialized) return;
-            
-            if (isMusicPlaying) {
-                audioElements.bgMusic.pause();
-                document.getElementById('audioControl').innerHTML = '<i class="fas fa-volume-mute"></i>';
-            } else {
-                audioElements.bgMusic.play()
-                    .catch(e => console.log("Error al reanudar música:", e));
-                document.getElementById('audioControl').innerHTML = '<i class="fas fa-volume-up"></i>';
-            }
-            isMusicPlaying = !isMusicPlaying;
-        }
-
-        // 6. Inicialización al cargar la página
-        document.addEventListener('DOMContentLoaded', () => {
-            initAudio();
-            
-            // Activar audio con la primera interacción
-            document.body.addEventListener('click', function firstInteraction() {
-                // Reproducir música de fondo si no está activa
-                if (!isMusicPlaying) {
-                    audioElements.bgMusic.play()
-                        .then(() => {
-                            isMusicPlaying = true;
-                            document.getElementById('audioControl').innerHTML = '<i class="fas fa-volume-up"></i>';
-                        })
-                        .catch(e => console.log("Error al iniciar música:", e));
-                }
-                
-                // Eliminar este event listener
-                document.body.removeEventListener('click', firstInteraction);
-            }, { once: true });
-            
-            // Control de música
-            document.getElementById('audioControl').addEventListener('click', toggleMusic);
-            
-            // Eventos para el enlace Zoom
-            const zoomLink = document.getElementById('zoomLink');
-            
-            // Sonido al hacer hover
-            zoomLink.addEventListener('mouseenter', () => {
-                playSound('hover', 0.4);
-            });
-            
-            // Sonido al hacer click
-            zoomLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                playSound('click', 0.6);
-                
-                // Abrir enlace después de 300ms para que el sonido se escuche
-                setTimeout(() => {
-                    window.open(zoomLink.href, '_blank');
-                }, 300);
-            });
-        });
-
-        // ============== CUENTA REGRESIVA ==============
+        // Elementos del DOM
         const daysEl = document.getElementById('days');
         const hoursEl = document.getElementById('hours');
         const minutesEl = document.getElementById('minutes');
         const secondsEl = document.getElementById('seconds');
         const messageEl = document.getElementById('message');
+        const bgMusic = document.getElementById('bgMusic');
+        const fanfare = document.getElementById('fanfare');
         
+        // Fecha objetivo: 16 de Mayo 2025 a las 15:00 (GMT-5)
         const targetDate = new Date('May 16, 2025 15:00:00 GMT-0500').getTime();
         
-        function updateCountdown() {
-            const now = new Date().getTime();
-            const distance = targetDate - now;
-            
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            
-            daysEl.textContent = days.toString().padStart(2, '0');
-            hoursEl.textContent = hours.toString().padStart(2, '0');
-            minutesEl.textContent = minutes.toString().padStart(2, '0');
-            secondsEl.textContent = seconds.toString().padStart(2, '0');
-            
-            if (distance < 3600000) {
-                document.querySelectorAll('.countdown-box').forEach(box => {
-                    box.style.background = 'linear-gradient(145deg, #ff0000, #ff6b6b)';
-                });
-            } else if (distance < 86400000) {
-                document.querySelectorAll('.countdown-box').forEach(box => {
-                    box.style.background = 'linear-gradient(145deg, #ff8c00, #ffb347)';
-                });
-            }
-            
-            if (distance < 0) {
-                clearInterval(interval);
-                messageEl.style.display = 'block';
-                playSound('fanfare', 0.7);
-                
-                createConfetti();
-                createFireworks();
-                
-                const celebrationInterval = setInterval(() => {
-                    createConfetti();
-                    createFireworks();
-                }, 1000);
-                
-                setTimeout(() => clearInterval(celebrationInterval), 10000);
-                
-                audioElements.bgMusic.volume = 0.6;
-            }
-        }
+        // Iniciar música de fondo (volumen bajo)
+        bgMusic.volume = 0.3;
+        // Intentar reproducir música (puede ser bloqueado por algunos navegadores sin interacción del usuario)
+        document.body.addEventListener('click', function() {
+            bgMusic.play().catch(e => console.log("Error al reproducir música: " + e));
+        }, { once: true });
         
+        // Función para crear confeti
         function createConfetti() {
             const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffffff'];
             
@@ -545,6 +374,7 @@
             }
         }
         
+        // Función para crear fuegos artificiales
         function createFireworks() {
             const colors = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#ff00ff'];
             
@@ -569,6 +399,58 @@
                 });
                 
                 setTimeout(() => firework.remove(), 2000);
+            }
+        }
+        
+        // Función principal de la cuenta regresiva
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            daysEl.textContent = days.toString().padStart(2, '0');
+            hoursEl.textContent = hours.toString().padStart(2, '0');
+            minutesEl.textContent = minutes.toString().padStart(2, '0');
+            secondsEl.textContent = seconds.toString().padStart(2, '0');
+            
+            // Cambiar colores cuando falte poco tiempo
+            if (distance < 3600000) { // Menos de 1 hora
+                document.querySelectorAll('.countdown-box').forEach(box => {
+                    box.style.background = 'linear-gradient(145deg, #ff0000, #ff6b6b)';
+                });
+            } else if (distance < 86400000) { // Menos de 1 día
+                document.querySelectorAll('.countdown-box').forEach(box => {
+                    box.style.background = 'linear-gradient(145deg, #ff8c00, #ffb347)';
+                });
+            }
+            
+            // Cuando la cuenta regresiva termine
+            if (distance < 0) {
+                clearInterval(interval);
+                messageEl.style.display = 'block';
+                
+                // Reproducir fanfarria
+                fanfare.volume = 0.7;
+                fanfare.play().catch(e => console.log("Error al reproducir fanfarria: " + e));
+                
+                // Efectos de celebración
+                createConfetti();
+                createFireworks();
+                
+                // Continuar con efectos cada segundo durante 10 segundos
+                const celebrationInterval = setInterval(() => {
+                    createConfetti();
+                    createFireworks();
+                }, 1000);
+                
+                setTimeout(() => clearInterval(celebrationInterval), 10000);
+                
+                // Aumentar volumen de música de fondo
+                bgMusic.volume = 0.6;
             }
         }
         
