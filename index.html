@@ -273,7 +273,7 @@
         
         <div class="container zoom-container">
             <h2>Enlace a la Sala Virtual (Único para todas las sesiones)</h2>
-            <a href="https://us02web.zoom.us/j/83963005690?pwd=THgbSxZJibgnqdSIXVDl9qYYWEq6lY.1" class="zoom-link" target="_blank">
+            <a href="https://us02web.zoom.us/j/83963005690?pwd=THgbSxZJibgnqdSIXVDl9qYYWEq6lY.1" class="zoom-link" id="zoomLink" target="_blank">
                 🚀 Ingresar a la Sala Zoom de Capacitación
             </a>
             <div class="motivation">
@@ -365,6 +365,12 @@
         Tu navegador no soporta el elemento de audio.
     </audio>
 
+    <!-- Audio para el efecto de agua al hacer clic en Zoom -->
+    <audio id="waterSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-water-sci-fi-bleep-902.mp3" type="audio/mpeg">
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+
     <!-- Control de audio flotante -->
     <div class="audio-control" id="audioControl">
         <i class="fas fa-volume-up"></i>
@@ -379,7 +385,9 @@
         const messageEl = document.getElementById('message');
         const bgMusic = document.getElementById('bgMusic');
         const fanfare = document.getElementById('fanfare');
+        const waterSound = document.getElementById('waterSound');
         const audioControl = document.getElementById('audioControl');
+        const zoomLink = document.getElementById('zoomLink');
         
         // Fecha objetivo: 16 de Mayo 2025 a las 15:00 (GMT-5)
         const targetDate = new Date('May 16, 2025 15:00:00 GMT-0500').getTime();
@@ -387,6 +395,26 @@
         // Control de audio
         let isMusicPlaying = false;
         
+        // Función para reproducir música automáticamente
+        function startBackgroundMusic() {
+            bgMusic.volume = 0.3;
+            const playPromise = bgMusic.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    isMusicPlaying = true;
+                    audioControl.innerHTML = '<i class="fas fa-volume-up"></i>';
+                })
+                .catch(error => {
+                    // Si falla la reproducción automática, mostrar botón de activación
+                    audioControl.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                    audioControl.style.display = 'block';
+                    isMusicPlaying = false;
+                });
+            }
+        }
+        
+        // Control manual de audio
         audioControl.addEventListener('click', function() {
             if (isMusicPlaying) {
                 bgMusic.pause();
@@ -398,18 +426,28 @@
             isMusicPlaying = !isMusicPlaying;
         });
         
-        // Intentar reproducir música automáticamente (puede ser bloqueado por algunos navegadores)
+        // Efecto de sonido al hacer clic en el enlace de Zoom
+        zoomLink.addEventListener('click', function(e) {
+            // Reproducir sonido de agua
+            waterSound.currentTime = 0;
+            waterSound.volume = 0.5;
+            waterSound.play().catch(error => console.log("Error al reproducir sonido: " + error));
+            
+            // Permitir que el enlace se abra normalmente
+            return true;
+        });
+        
+        // Intentar iniciar música automáticamente al cargar la página
+        window.addEventListener('load', function() {
+            startBackgroundMusic();
+        });
+        
+        // También intentar con la primera interacción del usuario
         document.body.addEventListener('click', function() {
             if (!isMusicPlaying) {
-                bgMusic.play().then(() => {
-                    isMusicPlaying = true;
-                    audioControl.innerHTML = '<i class="fas fa-volume-up"></i>';
-                }).catch(e => console.log("Error al reproducir música: " + e));
+                startBackgroundMusic();
             }
         }, { once: true });
-        
-        // Configuración inicial de audio
-        bgMusic.volume = 0.3;
         
         // Función para crear confeti
         function createConfetti() {
