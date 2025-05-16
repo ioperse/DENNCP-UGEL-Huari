@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Capacitación Docente UGEL Huari</title>
     <style>
-        /* === [ESTILO ORIGINAL - NO MODIFICADO] === */
         body {
             font-family: 'Arial Black', Gadget, sans-serif;
             background: linear-gradient(135deg, #0a1a3a, #1a3a7a);
@@ -20,6 +19,7 @@
             overflow-x: hidden;
         }
         
+        /* Banner dinámico */
         .banner {
             position: fixed;
             top: 0;
@@ -54,7 +54,7 @@
             gap: 20px;
             max-width: 900px;
             width: 100%;
-            margin-top: 50px;
+            margin-top: 50px; /* Espacio para el banner */
         }
         
         .container {
@@ -102,6 +102,7 @@
             flex-wrap: wrap;
         }
         
+        /* Mejora de contraste con gama de azules y violetas */
         .countdown-box {
             background: linear-gradient(145deg, #3a1a7a, #4a2a98);
             color: white;
@@ -264,66 +265,16 @@
             color: white;
         }
         
+        /* Estilo para la fecha actual resaltada */
         .current-event {
             background-color: #e6f7ff !important;
             font-weight: bold;
-        }
-
-        /* === [ESTILO NUEVO - ESTRELLA DENNIS] === */
-        #estrella-dennis {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            width: 1.2cm;
-            height: 1.2cm;
-            z-index: 1001; /* Mayor que el banner (1000) */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            pointer-events: none; /* Permite hacer clic a través de ella */
-        }
-
-        .forma-estrella-dennis {
-            width: 100%;
-            height: 100%;
-            background-color: #e74c3c;
-            border: 2px solid #f1c40f;
-            clip-path: polygon(
-                50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%,
-                50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%
-            );
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            animation: rebote-dennis 1.5s ease-in-out;
-        }
-
-        .nombre-estrella-dennis {
-            color: #f1c40f;
-            font-size: 8px;
-            font-weight: bold;
-            transform: scale(0.8);
-            text-align: center;
-        }
-
-        @keyframes rebote-dennis {
-            0%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-20px); }
-            60% { transform: translateY(-10px); }
-            80% { transform: translateY(-5px); }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <!-- === [ESTRELLA DENNIS - ELEMENTO NUEVO] === -->
-    <div id="estrella-dennis">
-        <div class="forma-estrella-dennis">
-            <div class="nombre-estrella-dennis">Dennis</div>
-        </div>
-    </div>
-
-    <!-- === [CONTENIDO ORIGINAL - NO MODIFICADO] === -->
+    <!-- Banner dinámico -->
     <div class="banner">
         <div class="banner-text">UGEL Huari impulsando el fortalecimiento de competencias digitales docentes | Transformando la educación con tecnología | Juntos por una educación de calidad</div>
     </div>
@@ -449,7 +400,8 @@
     </div>
 
     <script>
-        // === [CÓDIGO ORIGINAL - NO MODIFICADO] ===
+        // ============== SISTEMA DE AUDIO MEJORADO ==============
+        
         // 1. Configuración de audio
         const audioElements = {
             bgMusic: new Audio('https://stream.zeno.fm/0r0xa792kwzuv'),
@@ -734,32 +686,6 @@
         
         // Iniciar el contador con el primer evento
         initCountdown();
-
-        // === [CÓDIGO NUEVO - ANIMACIÓN ESTRELLA DENNIS] ===
-        document.addEventListener('DOMContentLoaded', function() {
-            const estrella = document.getElementById('estrella-dennis');
-            const formaEstrella = document.querySelector('.forma-estrella-dennis');
-            
-            // Secuencia de aparición/desaparición
-            function iniciarSecuencia() {
-                const intervalos = [5000, 6000, 10000]; // 5, 6 y 10 segundos
-                let indice = 0;
-                
-                const alternar = () => {
-                    estrella.style.display = (estrella.style.display === 'none') ? 'flex' : 'none';
-                    setTimeout(alternar, intervalos[indice]);
-                    indice = (indice + 1) % intervalos.length;
-                };
-                
-                setTimeout(() => {
-                    estrella.style.display = 'none';
-                    setTimeout(alternar, intervalos[indice]);
-                }, 3000);
-            }
-            
-            // Iniciar después del rebote inicial (1.5s)
-            setTimeout(iniciarSecuencia, 1500);
-        });
     </script>
 </body>
 </html>
