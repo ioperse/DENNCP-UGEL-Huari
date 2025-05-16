@@ -19,12 +19,42 @@
             overflow-x: hidden;
         }
         
+        /* Banner dinámico */
+        .banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(90deg, rgba(26,58,122,0.8), rgba(10,26,58,0.9));
+            color: #ffcc00;
+            padding: 10px 0;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            z-index: 1000;
+            white-space: nowrap;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .banner-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: banner-scroll 20s linear infinite;
+        }
+        
+        @keyframes banner-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+        
         .main-container {
             display: flex;
             flex-direction: column;
             gap: 20px;
             max-width: 900px;
             width: 100%;
+            margin-top: 50px; /* Espacio para el banner */
         }
         
         .container {
@@ -72,14 +102,15 @@
             flex-wrap: wrap;
         }
         
+        /* Mejora de contraste con gama de azules y violetas */
         .countdown-box {
-            background: linear-gradient(145deg, #1a3a7a, #2a5298);
+            background: linear-gradient(145deg, #3a1a7a, #4a2a98);
             color: white;
             padding: 25px;
             border-radius: 10px;
             min-width: 90px;
             box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-            border: 2px solid #ffcc00;
+            border: 2px solid #7f5af0;
         }
         
         .number {
@@ -95,12 +126,12 @@
             letter-spacing: 2px;
             margin-top: 8px;
             font-weight: bold;
-            color: #ffcc00;
+            color: #b8c1ec;
         }
         
         .event-date {
-            background: linear-gradient(to right, #ff6b6b, #ff8e8e);
-            color: #6d1a36;
+            background: linear-gradient(to right, #7f5af0, #b8c1ec);
+            color: #ffffff;
             padding: 15px 25px;
             border-radius: 8px;
             font-weight: bold;
@@ -119,10 +150,11 @@
             color: #1a3a7a;
             animation: pulse 0.5s infinite alternate;
             text-shadow: 0 3px 6px rgba(0,0,0,0.3);
-            background: linear-gradient(to right, #ffcc00, #ffeb3b);
+            background: linear-gradient(to right, #7f5af0, #b8c1ec);
             padding: 15px;
             border-radius: 10px;
             border: 3px solid #1a3a7a;
+            color: white;
         }
         
         @keyframes pulse {
@@ -232,16 +264,27 @@
             font-size: 24px;
             color: white;
         }
+        
+        /* Estilo para la fecha actual resaltada */
+        .current-event {
+            background-color: #e6f7ff !important;
+            font-weight: bold;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+    <!-- Banner dinámico -->
+    <div class="banner">
+        <div class="banner-text">UGEL Huari impulsando el fortalecimiento de competencias digitales docentes | Transformando la educación con tecnología | Juntos por una educación de calidad</div>
+    </div>
+
     <div class="main-container">
         <div class="container countdown-container">
             <h1>UGEL HUARI - DIFODS MINEDU</h1>
             <p style="font-size: 20px; font-weight: bold; color: #1a3a7a;">FORTALECIMIENTO DE COMPETENCIAS DIGITALES PARA DOCENTES</p>
             
-            <div class="event-date">
+            <div class="event-date" id="currentEventDate">
                 🗓️ Inauguración: 16 de Mayo 2025 - 🕒 15:00 horas
             </div>
             
@@ -281,7 +324,7 @@
         
         <div class="container schedule-container">
             <h2>Cronograma de Sesiones (Enlace único)</h2>
-            <table>
+            <table id="scheduleTable">
                 <thead>
                     <tr>
                         <th>Fecha</th>
@@ -447,37 +490,83 @@
             // Control de música
             document.getElementById('audioControl').addEventListener('click', toggleMusic);
             
-            // Eventos para el enlace Zoom
+            // Eventos para el enlace Zoom - MEJORADO
             const zoomLink = document.getElementById('zoomLink');
             
-            // Sonido al hacer hover
+            // Sonido al hacer hover - AHORA FUNCIONA
             zoomLink.addEventListener('mouseenter', () => {
                 playSound('hover', 0.4);
             });
             
-            // Sonido al hacer click
-            zoomLink.addEventListener('click', (e) => {
-                e.preventDefault();
+            // Sonido al hacer click - MEJORADO
+            zoomLink.addEventListener('mousedown', () => {
                 playSound('click', 0.6);
-                
-                // Abrir enlace después de 300ms para que el sonido se escuche
-                setTimeout(() => {
-                    window.open(zoomLink.href, '_blank');
-                }, 300);
+            });
+            
+            // Abrir enlace en nueva pestaña sin prevenir el comportamiento por defecto
+            zoomLink.addEventListener('click', (e) => {
+                // Permitir que el enlace se abra normalmente
+                // El sonido ya se activó con mousedown
             });
         });
 
-        // ============== CUENTA REGRESIVA ==============
+        // ============== CUENTA REGRESIVA MEJORADA ==============
         const daysEl = document.getElementById('days');
         const hoursEl = document.getElementById('hours');
         const minutesEl = document.getElementById('minutes');
         const secondsEl = document.getElementById('seconds');
         const messageEl = document.getElementById('message');
+        const currentEventDateEl = document.getElementById('currentEventDate');
+        const scheduleTable = document.getElementById('scheduleTable');
         
-        const targetDate = new Date('May 16, 2025 15:00:00 GMT-0500').getTime();
+        // Datos del cronograma
+        const schedule = [
+            { date: '16/05/2025', time: '15:00', title: 'Inauguración: Uso pedagógico del Genially para elaborar evaluaciones lúdicas con inteligencia artificial IA' },
+            { date: '23/05/2025', time: '15:00', title: 'Uso pedagógico del Sildesgo para elaborar presentaciones y organizadores gráficos orientado a potenciar las competencias comunicativas' },
+            { date: '30/05/2025', time: '15:00', title: 'Uso pedagógico de la app Scratch para desarrollar competencias comunicativas orientada a la creación de historietas y cuentos' },
+            { date: '04/06/2025', time: '15:00', title: 'Uso pedagógico del aplicativo Phet Interactive para el desarrollo de las competencias matemáticas y/o ciencia tecnología' },
+            { date: '11/06/2025', time: '15:00', title: 'Uso pedagógico de Canva en la creación de presentaciones de audio y video con IA para dinamizar las sesiones de aprendizaje' },
+            { date: '18/06/2025', time: '15:00', title: 'Uso pedagógico de la herramienta de inteligencia artificial (IA) prompts para el desarrollo de las competencias comunicativas' },
+            { date: '25/06/2025', time: '15:00', title: 'Uso pedagógico de la APP Octostudio para producción de textos' },
+            { date: '02/07/2025', time: '15:00', title: 'Uso pedagógico de Rodocodo y Octostudio para el logro de competencias comunicativas' },
+            { date: '09/07/2025', time: '15:00', title: 'Uso pedagógico de Khanmigo para crear actividades orientadas al desarrollo de los aprendizajes de los estudiantes' }
+        ];
+        
+        let currentEventIndex = 0;
+        let countdownInterval;
+        let targetDate;
+        
+        // Función para analizar fechas en formato DD/MM/YYYY
+        function parseDate(dateStr, timeStr) {
+            const [day, month, year] = dateStr.split('/').map(Number);
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return new Date(year, month - 1, day, hours, minutes, 0);
+        }
+        
+        // Inicializar el contador con el primer evento
+        function initCountdown() {
+            // Resetear estilos de la tabla
+            const rows = scheduleTable.querySelectorAll('tbody tr');
+            rows.forEach(row => row.classList.remove('current-event'));
+            
+            // Marcar evento actual en la tabla
+            if (currentEventIndex < rows.length) {
+                rows[currentEventIndex].classList.add('current-event');
+            }
+            
+            const currentEvent = schedule[currentEventIndex];
+            targetDate = parseDate(currentEvent.date, currentEvent.time);
+            
+            // Actualizar texto del evento actual
+            currentEventDateEl.innerHTML = `🗓️ ${currentEvent.title} - 🕒 ${currentEvent.date} a las ${currentEvent.time} horas`;
+            
+            // Iniciar el contador
+            updateCountdown();
+            countdownInterval = setInterval(updateCountdown, 1000);
+        }
         
         function updateCountdown() {
-            const now = new Date().getTime();
+            const now = new Date();
             const distance = targetDate - now;
             
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -490,18 +579,24 @@
             minutesEl.textContent = minutes.toString().padStart(2, '0');
             secondsEl.textContent = seconds.toString().padStart(2, '0');
             
-            if (distance < 3600000) {
+            // Cambiar colores según el tiempo restante
+            if (distance < 3600000) { // Menos de 1 hora
                 document.querySelectorAll('.countdown-box').forEach(box => {
-                    box.style.background = 'linear-gradient(145deg, #ff0000, #ff6b6b)';
+                    box.style.background = 'linear-gradient(145deg, #ff3860, #ff6b6b)';
                 });
-            } else if (distance < 86400000) {
+            } else if (distance < 86400000) { // Menos de 1 día
                 document.querySelectorAll('.countdown-box').forEach(box => {
                     box.style.background = 'linear-gradient(145deg, #ff8c00, #ffb347)';
+                });
+            } else {
+                // Volver a colores originales (azules/violetas)
+                document.querySelectorAll('.countdown-box').forEach(box => {
+                    box.style.background = 'linear-gradient(145deg, #3a1a7a, #4a2a98)';
                 });
             }
             
             if (distance < 0) {
-                clearInterval(interval);
+                clearInterval(countdownInterval);
                 messageEl.style.display = 'block';
                 playSound('fanfare', 0.7);
                 
@@ -516,6 +611,23 @@
                 setTimeout(() => clearInterval(celebrationInterval), 10000);
                 
                 audioElements.bgMusic.volume = 0.6;
+                
+                // 10 minutos después, pasar al siguiente evento
+                setTimeout(() => {
+                    messageEl.style.display = 'none';
+                    currentEventIndex++;
+                    
+                    if (currentEventIndex < schedule.length) {
+                        initCountdown();
+                    } else {
+                        // Todos los eventos han terminado
+                        currentEventDateEl.textContent = "¡Todas las sesiones de capacitación han concluido!";
+                        daysEl.textContent = '00';
+                        hoursEl.textContent = '00';
+                        minutesEl.textContent = '00';
+                        secondsEl.textContent = '00';
+                    }
+                }, 600000); // 10 minutos = 600,000 ms
             }
         }
         
@@ -572,8 +684,8 @@
             }
         }
         
-        const interval = setInterval(updateCountdown, 1000);
-        updateCountdown();
+        // Iniciar el contador con el primer evento
+        initCountdown();
     </script>
 </body>
 </html>
