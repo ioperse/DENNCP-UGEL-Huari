@@ -229,25 +229,6 @@
             font-size: 16px;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
         }
-        
-        .confetti {
-            position: absolute;
-            width: 15px;
-            height: 15px;
-            background-color: #f00;
-            opacity: 0;
-            z-index: 1;
-        }
-        
-        .firework {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            box-shadow: 0 0 15px 8px;
-            opacity: 0;
-            z-index: 1;
-        }
 
         .audio-control {
             position: fixed;
@@ -292,7 +273,7 @@
             <p style="font-size: 20px; font-weight: bold; color: #1a3a7a;">FORTALECIMIENTO DE COMPETENCIAS DIGITALES PARA DOCENTES</p>
             
             <div class="event-date" id="currentEventDate">
-                🗓️ Inauguración: 16 de Mayo 2025 - 🕒 15:00 horas
+                🗓️ Sesión 2: 23 de Mayo 2025 - 🕒 15:00 horas
             </div>
             
             <div class="countdown">
@@ -315,7 +296,7 @@
             </div>
             
             <div id="message">
-                ¡BIENVENIDOS! INICIAMOS 🎉
+                ¡LA SESIÓN HA COMENZADO! BIENVENIDOS
             </div>
         </div>
         
@@ -347,7 +328,7 @@
                         <td>Uso pedagógico del Genially para elaborar evaluaciones lúdicas con inteligencia artificial IA</td>
                         <td>Primaria/Secundaria</td>
                     </tr>
-                    <tr>
+                    <tr class="current-event">
                         <td>23/05/2025</td>
                         <td>15:00</td>
                         <td>Uso pedagógico del Slidesgo para elaborar presentaciones y organizadores gráficos orientado a potenciar las competencias comunicativas</td>
@@ -411,11 +392,10 @@
         
         // 1. Configuración de audio
         const audioElements = {
-            bgMusic: new Audio('https://stream.zeno.fm/0r0xa792kwzuv'),
-            hover: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3'),
-            click: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-quick-jump-arcade-game-239.mp3'),
-            dateClick: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-interface-hint-notification-911.mp3'),
-            fanfare: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3')
+            bgMusic: new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'), // Música clásica
+            hover: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-modern-click-box-check-1120.mp3'), // Sonido suave
+            click: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3'), // Sonido de click
+            dateClick: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3') // Sonido especial para fechas
         };
 
         // 2. Estado del audio
@@ -426,9 +406,9 @@
         function initAudio() {
             if (audioInitialized) return;
             
-            // Configurar música de fondo
+            // Configurar música de fondo al 36% de volumen
             audioElements.bgMusic.loop = true;
-            audioElements.bgMusic.volume = 0.35;
+            audioElements.bgMusic.volume = 0.36; // Volumen al 36%
             
             // Configurar efectos de sonido
             Object.values(audioElements).forEach(audio => {
@@ -437,6 +417,14 @@
             
             audioInitialized = true;
             console.log("Sistema de audio inicializado");
+            
+            // Iniciar música automáticamente (sin necesidad de interacción)
+            audioElements.bgMusic.play()
+                .then(() => {
+                    isMusicPlaying = true;
+                    document.getElementById('audioControl').innerHTML = '<i class="fas fa-volume-up"></i>';
+                })
+                .catch(e => console.log("Error al iniciar música:", e));
         }
 
         // 4. Función para reproducir sonidos
@@ -479,36 +467,20 @@
         document.addEventListener('DOMContentLoaded', () => {
             initAudio();
             
-            // Activar audio con la primera interacción
-            document.body.addEventListener('click', function firstInteraction() {
-                // Reproducir música de fondo si no está activa
-                if (!isMusicPlaying) {
-                    audioElements.bgMusic.play()
-                        .then(() => {
-                            isMusicPlaying = true;
-                            document.getElementById('audioControl').innerHTML = '<i class="fas fa-volume-up"></i>';
-                        })
-                        .catch(e => console.log("Error al iniciar música:", e));
-                }
-                
-                // Eliminar este event listener
-                document.body.removeEventListener('click', firstInteraction);
-            }, { once: true });
-            
             // Control de música
             document.getElementById('audioControl').addEventListener('click', toggleMusic);
             
-            // Eventos para el enlace Zoom - MEJORADO
+            // Eventos para el enlace Zoom
             const zoomLink = document.getElementById('zoomLink');
             
-            // Sonido al hacer hover - AHORA FUNCIONA
+            // Sonido al hacer hover
             zoomLink.addEventListener('mouseenter', () => {
-                playSound('hover', 0.4);
+                playSound('hover', 0.3);
             });
             
-            // Sonido al hacer click - MEJORADO
+            // Sonido al hacer click
             zoomLink.addEventListener('mousedown', () => {
-                playSound('click', 0.6);
+                playSound('click', 0.4);
             });
             
             // Sonido al hacer click en las fechas de la tabla
@@ -518,9 +490,9 @@
                 dateCell.style.cursor = 'pointer';
                 dateCell.addEventListener('click', () => {
                     if (dateCell.textContent === '23/05/2025') {
-                        playSound('dateClick', 0.8);
+                        playSound('dateClick', 0.5);
                     } else {
-                        playSound('click', 0.6);
+                        playSound('click', 0.4);
                     }
                 });
             });
@@ -537,18 +509,18 @@
         
         // Datos del cronograma
         const schedule = [
-            { date: '16/05/2025', time: '15:00', title: 'Inauguración: Uso pedagógico del Genially para elaborar evaluaciones lúdicas con inteligencia artificial IA' },
-            { date: '23/05/2025', time: '15:00', title: 'Uso pedagógico del Slidesgo para elaborar presentaciones y organizadores gráficos orientado a potenciar las competencias comunicativas' },
-            { date: '30/05/2025', time: '15:00', title: 'Uso pedagógico de la app Scratch para desarrollar competencias comunicativas orientada a la creación de historietas y cuentos' },
-            { date: '04/06/2025', time: '15:00', title: 'Uso pedagógico del aplicativo Phet Interactive para el desarrollo de las competencias matemáticas y/o ciencia tecnología' },
-            { date: '11/06/2025', time: '15:00', title: 'Uso pedagógico de Canva en la creación de presentaciones de audio y video con IA para dinamizar las sesiones de aprendizaje' },
-            { date: '18/06/2025', time: '15:00', title: 'Uso pedagógico de la herramienta de inteligencia artificial (IA) prompts para el desarrollo de las competencias comunicativas' },
-            { date: '25/06/2025', time: '15:00', title: 'Uso pedagógico de la APP Octostudio para producción de textos' },
-            { date: '02/07/2025', time: '15:00', title: 'Uso pedagógico de Rodocodo y Octostudio para el logro de competencias comunicativas' },
-            { date: '09/07/2025', time: '15:00', title: 'Uso pedagógico de Khanmigo para crear actividades orientadas al desarrollo de los aprendizajes de los estudiantes' }
+            { date: '16/05/2025', time: '15:00', title: 'Sesión 1: Uso pedagógico del Genially para elaborar evaluaciones lúdicas con inteligencia artificial IA' },
+            { date: '23/05/2025', time: '15:00', title: 'Sesión 2: Uso pedagógico del Slidesgo para elaborar presentaciones y organizadores gráficos orientado a potenciar las competencias comunicativas' },
+            { date: '30/05/2025', time: '15:00', title: 'Sesión 3: Uso pedagógico de la app Scratch para desarrollar competencias comunicativas orientada a la creación de historietas y cuentos' },
+            { date: '04/06/2025', time: '15:00', title: 'Sesión 4: Uso pedagógico del aplicativo Phet Interactive para el desarrollo de las competencias matemáticas y/o ciencia tecnología' },
+            { date: '11/06/2025', time: '15:00', title: 'Sesión 5: Uso pedagógico de Canva en la creación de presentaciones de audio y video con IA para dinamizar las sesiones de aprendizaje' },
+            { date: '18/06/2025', time: '15:00', title: 'Sesión 6: Uso pedagógico de la herramienta de inteligencia artificial (IA) prompts para el desarrollo de las competencias comunicativas' },
+            { date: '25/06/2025', time: '15:00', title: 'Sesión 7: Uso pedagógico de la APP Octostudio para producción de textos' },
+            { date: '02/07/2025', time: '15:00', title: 'Sesión 8: Uso pedagógico de Rodocodo y Octostudio para el logro de competencias comunicativas' },
+            { date: '09/07/2025', time: '15:00', title: 'Sesión 9: Uso pedagógico de Khanmigo para crear actividades orientadas al desarrollo de los aprendizajes de los estudiantes' }
         ];
         
-        let currentEventIndex = 0;
+        let currentEventIndex = 1; // Comenzamos con la segunda sesión (23/05)
         let countdownInterval;
         let targetDate;
         let resetTimeout;
@@ -561,7 +533,7 @@
             return new Date(year, month - 1, day, hours, minutes, 0);
         }
         
-        // Inicializar el contador con el primer evento
+        // Inicializar el contador con el evento actual
         function initCountdown() {
             // Limpiar intervalos y timeouts anteriores
             clearInterval(countdownInterval);
@@ -635,7 +607,6 @@
                 isEventInProgress = true;
                 clearInterval(countdownInterval);
                 messageEl.style.display = 'block';
-                playSound('fanfare', 0.7);
                 
                 // Marcar evento en progreso en la tabla
                 const rows = scheduleTable.querySelectorAll('tbody tr');
@@ -643,18 +614,6 @@
                     rows[currentEventIndex].classList.remove('current-event');
                     rows[currentEventIndex].classList.add('in-progress');
                 }
-                
-                createConfetti();
-                createFireworks();
-                
-                const celebrationInterval = setInterval(() => {
-                    createConfetti();
-                    createFireworks();
-                }, 1000);
-                
-                setTimeout(() => clearInterval(celebrationInterval), 10000);
-                
-                audioElements.bgMusic.volume = 0.6;
                 
                 // 30 minutos después del inicio del evento, reiniciar el contador para el siguiente evento
                 resetTimeout = setTimeout(() => {
@@ -668,60 +627,7 @@
             }
         }
         
-        function createConfetti() {
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffffff'];
-            
-            for (let i = 0; i < 200; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.left = Math.random() * 100 + 'vw';
-                confetti.style.top = -10 + 'px';
-                confetti.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
-                document.body.appendChild(confetti);
-                
-                const animationDuration = Math.random() * 3 + 2;
-                
-                confetti.animate([
-                    { top: '-10px', opacity: 1, transform: `rotate(${Math.random() * 360}deg)` },
-                    { top: '100vh', opacity: 0.7, transform: `rotate(${Math.random() * 720}deg)` }
-                ], {
-                    duration: animationDuration * 1000,
-                    easing: 'cubic-bezier(0.1, 0.8, 0.9, 1)'
-                });
-                
-                setTimeout(() => confetti.remove(), animationDuration * 1000);
-            }
-        }
-        
-        function createFireworks() {
-            const colors = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#ff00ff'];
-            
-            for (let i = 0; i < 30; i++) {
-                const firework = document.createElement('div');
-                firework.className = 'firework';
-                firework.style.color = colors[Math.floor(Math.random() * colors.length)];
-                firework.style.left = Math.random() * 80 + 10 + 'vw';
-                firework.style.top = Math.random() * 80 + 10 + 'vh';
-                document.body.appendChild(firework);
-                
-                const size = Math.random() * 10 + 5;
-                firework.style.width = size + 'px';
-                firework.style.height = size + 'px';
-                
-                firework.animate([
-                    { transform: 'scale(0.1)', opacity: 1 },
-                    { transform: 'scale(1.5)', opacity: 0 }
-                ], {
-                    duration: 2000,
-                    easing: 'ease-out'
-                });
-                
-                setTimeout(() => firework.remove(), 2000);
-            }
-        }
-        
-        // Iniciar el contador con el primer evento
+        // Iniciar el contador con el evento actual (segunda sesión)
         initCountdown();
     </script>
 </body>
