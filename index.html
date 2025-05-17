@@ -196,7 +196,7 @@
             border-collapse: collapse;
             margin: 20px 0;
             background: white;
-            color: #1a3a7a;
+            color: #1a3a3a;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
@@ -269,6 +269,13 @@
         .current-event {
             background-color: #e6f7ff !important;
             font-weight: bold;
+        }
+        
+        /* Estilo para el evento en progreso */
+        .in-progress {
+            background-color: #fffacd !important;
+            font-weight: bold;
+            border-left: 5px solid #ffcc00;
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -343,7 +350,7 @@
                     <tr>
                         <td>23/05/2025</td>
                         <td>15:00</td>
-                        <td>Uso pedagógico del Sildesgo para elaborar presentaciones y organizadores gráficos orientado a potenciar las competencias comunicativas</td>
+                        <td>Uso pedagógico del Slidesgo para elaborar presentaciones y organizadores gráficos orientado a potenciar las competencias comunicativas</td>
                         <td>Primaria/Secundaria</td>
                     </tr>
                     <tr>
@@ -407,6 +414,7 @@
             bgMusic: new Audio('https://stream.zeno.fm/0r0xa792kwzuv'),
             hover: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3'),
             click: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-quick-jump-arcade-game-239.mp3'),
+            dateClick: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-interface-hint-notification-911.mp3'),
             fanfare: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3')
         };
 
@@ -503,10 +511,18 @@
                 playSound('click', 0.6);
             });
             
-            // Abrir enlace en nueva pestaña sin prevenir el comportamiento por defecto
-            zoomLink.addEventListener('click', (e) => {
-                // Permitir que el enlace se abra normalmente
-                // El sonido ya se activó con mousedown
+            // Sonido al hacer click en las fechas de la tabla
+            const tableRows = document.querySelectorAll('#scheduleTable tbody tr');
+            tableRows.forEach(row => {
+                const dateCell = row.cells[0];
+                dateCell.style.cursor = 'pointer';
+                dateCell.addEventListener('click', () => {
+                    if (dateCell.textContent === '23/05/2025') {
+                        playSound('dateClick', 0.8);
+                    } else {
+                        playSound('click', 0.6);
+                    }
+                });
             });
         });
 
@@ -522,7 +538,7 @@
         // Datos del cronograma
         const schedule = [
             { date: '16/05/2025', time: '15:00', title: 'Inauguración: Uso pedagógico del Genially para elaborar evaluaciones lúdicas con inteligencia artificial IA' },
-            { date: '23/05/2025', time: '15:00', title: 'Uso pedagógico del Sildesgo para elaborar presentaciones y organizadores gráficos orientado a potenciar las competencias comunicativas' },
+            { date: '23/05/2025', time: '15:00', title: 'Uso pedagógico del Slidesgo para elaborar presentaciones y organizadores gráficos orientado a potenciar las competencias comunicativas' },
             { date: '30/05/2025', time: '15:00', title: 'Uso pedagógico de la app Scratch para desarrollar competencias comunicativas orientada a la creación de historietas y cuentos' },
             { date: '04/06/2025', time: '15:00', title: 'Uso pedagógico del aplicativo Phet Interactive para el desarrollo de las competencias matemáticas y/o ciencia tecnología' },
             { date: '11/06/2025', time: '15:00', title: 'Uso pedagógico de Canva en la creación de presentaciones de audio y video con IA para dinamizar las sesiones de aprendizaje' },
@@ -535,6 +551,8 @@
         let currentEventIndex = 0;
         let countdownInterval;
         let targetDate;
+        let resetTimeout;
+        let isEventInProgress = false;
         
         // Función para analizar fechas en formato DD/MM/YYYY
         function parseDate(dateStr, timeStr) {
@@ -545,13 +563,25 @@
         
         // Inicializar el contador con el primer evento
         function initCountdown() {
+            // Limpiar intervalos y timeouts anteriores
+            clearInterval(countdownInterval);
+            clearTimeout(resetTimeout);
+            
             // Resetear estilos de la tabla
             const rows = scheduleTable.querySelectorAll('tbody tr');
-            rows.forEach(row => row.classList.remove('current-event'));
+            rows.forEach(row => {
+                row.classList.remove('current-event');
+                row.classList.remove('in-progress');
+            });
             
-            // Marcar evento actual en la tabla
-            if (currentEventIndex < rows.length) {
-                rows[currentEventIndex].classList.add('current-event');
+            // Si hemos pasado todos los eventos
+            if (currentEventIndex >= schedule.length) {
+                currentEventDateEl.textContent = "¡Todas las sesiones de capacitación han concluido!";
+                daysEl.textContent = '00';
+                hoursEl.textContent = '00';
+                minutesEl.textContent = '00';
+                secondsEl.textContent = '00';
+                return;
             }
             
             const currentEvent = schedule[currentEventIndex];
@@ -559,6 +589,11 @@
             
             // Actualizar texto del evento actual
             currentEventDateEl.innerHTML = `🗓️ ${currentEvent.title} - 🕒 ${currentEvent.date} a las ${currentEvent.time} horas`;
+            
+            // Marcar evento actual en la tabla
+            if (currentEventIndex < rows.length) {
+                rows[currentEventIndex].classList.add('current-event');
+            }
             
             // Iniciar el contador
             updateCountdown();
@@ -595,10 +630,19 @@
                 });
             }
             
-            if (distance < 0) {
+            if (distance < 0 && !isEventInProgress) {
+                // El evento ha comenzado
+                isEventInProgress = true;
                 clearInterval(countdownInterval);
                 messageEl.style.display = 'block';
                 playSound('fanfare', 0.7);
+                
+                // Marcar evento en progreso en la tabla
+                const rows = scheduleTable.querySelectorAll('tbody tr');
+                if (currentEventIndex < rows.length) {
+                    rows[currentEventIndex].classList.remove('current-event');
+                    rows[currentEventIndex].classList.add('in-progress');
+                }
                 
                 createConfetti();
                 createFireworks();
@@ -612,22 +656,15 @@
                 
                 audioElements.bgMusic.volume = 0.6;
                 
-                // 10 minutos después, pasar al siguiente evento
-                setTimeout(() => {
+                // 30 minutos después del inicio del evento, reiniciar el contador para el siguiente evento
+                resetTimeout = setTimeout(() => {
                     messageEl.style.display = 'none';
+                    isEventInProgress = false;
                     currentEventIndex++;
                     
-                    if (currentEventIndex < schedule.length) {
-                        initCountdown();
-                    } else {
-                        // Todos los eventos han terminado
-                        currentEventDateEl.textContent = "¡Todas las sesiones de capacitación han concluido!";
-                        daysEl.textContent = '00';
-                        hoursEl.textContent = '00';
-                        minutesEl.textContent = '00';
-                        secondsEl.textContent = '00';
-                    }
-                }, 600000); // 10 minutos = 600,000 ms
+                    // Reiniciar el contador para el siguiente evento
+                    initCountdown();
+                }, 1800000); // 30 minutos = 1,800,000 ms
             }
         }
         
