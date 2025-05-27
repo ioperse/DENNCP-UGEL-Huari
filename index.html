@@ -258,6 +258,29 @@
             font-weight: bold;
             border-left: 5px solid #ffcc00;
         }
+        
+        /* Nuevo bloque para fecha y hora actual */
+        .datetime-container {
+            background: rgba(255,255,255,0.9);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 2px solid #7f5af0;
+        }
+        
+        .current-datetime {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a3a7a;
+            margin-bottom: 10px;
+        }
+        
+        .daily-motivation {
+            font-style: italic;
+            color: #1a3a7a;
+            font-size: 16px;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -268,6 +291,16 @@
     </div>
 
     <div class="main-container">
+        <!-- Nuevo contenedor para fecha y hora actual -->
+        <div class="container datetime-container">
+            <div class="current-datetime" id="currentDateTime">
+                🗓️ Hoy es martes, 21 de mayo de 2024 - 🕒 10:30:45 AM
+            </div>
+            <div class="daily-motivation" id="dailyMotivation">
+                "La tecnología es solo una herramienta. Para conseguir que los niños trabajen juntos y motivarlos, el profesor es lo más importante." - Bill Gates
+            </div>
+        </div>
+        
         <div class="container countdown-container">
             <h1>UGEL HUARI - DIFODS MINEDU</h1>
             <p style="font-size: 20px; font-weight: bold; color: #1a3a7a;">FORTALECIMIENTO DE COMPETENCIAS DIGITALES PARA DOCENTES</p>
@@ -526,11 +559,40 @@
         let resetTimeout;
         let isEventInProgress = false;
         
+        // Frases motivadoras para cada día
+        const motivationalPhrases = [
+            "La tecnología es solo una herramienta. Para conseguir que los niños trabajen juntos y motivarlos, el profesor es lo más importante. - Bill Gates",
+            "La educación es el arma más poderosa que puedes usar para cambiar el mundo. - Nelson Mandela",
+            "El arte supremo del maestro es despertar el goce de la expresión creativa y el conocimiento. - Albert Einstein",
+            "La tecnología puede convertirse en el 'lápiz' de hoy, transformando la manera en que aprendemos y enseñamos. - Sugata Mitra",
+            "Enseñar es aprender dos veces. - Joseph Joubert",
+            "El objetivo de la educación es preparar a los jóvenes para que se eduquen a sí mismos durante toda su vida. - Robert Hutchins",
+            "La tecnología no reemplazará a los maestros, pero los maestros que usan tecnología reemplazarán a los que no la usan. - Ray Kurzweil",
+            "La educación no es la preparación para la vida; la educación es la vida en sí misma. - John Dewey",
+            "El aprendizaje es un tesoro que seguirá a su dueño a todas partes. - Proverbio chino",
+            "La enseñanza que deja huella no es la que se hace de cabeza a cabeza, sino de corazón a corazón. - Howard Hendricks"
+        ];
+        
         // Función para analizar fechas en formato DD/MM/YYYY
         function parseDate(dateStr, timeStr) {
             const [day, month, year] = dateStr.split('/').map(Number);
             const [hours, minutes] = timeStr.split(':').map(Number);
             return new Date(year, month - 1, day, hours, minutes, 0);
+        }
+        
+        // Función para actualizar fecha y hora actual
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateStr = now.toLocaleDateString('es-ES', options);
+            const timeStr = now.toLocaleTimeString('es-ES');
+            
+            document.getElementById('currentDateTime').innerHTML = `🗓️ Hoy es ${dateStr} - 🕒 ${timeStr}`;
+            
+            // Seleccionar frase motivadora basada en el día del mes
+            const dayOfMonth = now.getDate();
+            const phraseIndex = dayOfMonth % motivationalPhrases.length;
+            document.getElementById('dailyMotivation').textContent = `"${motivationalPhrases[phraseIndex]}"`;
         }
         
         // Inicializar el contador con el evento actual
@@ -608,6 +670,12 @@
                 clearInterval(countdownInterval);
                 messageEl.style.display = 'block';
                 
+                // Mostrar 00:00:00:00
+                daysEl.textContent = '00';
+                hoursEl.textContent = '00';
+                minutesEl.textContent = '00';
+                secondsEl.textContent = '00';
+                
                 // Marcar evento en progreso en la tabla
                 const rows = scheduleTable.querySelectorAll('tbody tr');
                 if (currentEventIndex < rows.length) {
@@ -615,7 +683,7 @@
                     rows[currentEventIndex].classList.add('in-progress');
                 }
                 
-                // 30 minutos después del inicio del evento, reiniciar el contador para el siguiente evento
+                // 10 minutos después del inicio del evento, reiniciar el contador para el siguiente evento
                 resetTimeout = setTimeout(() => {
                     messageEl.style.display = 'none';
                     isEventInProgress = false;
@@ -623,12 +691,16 @@
                     
                     // Reiniciar el contador para el siguiente evento
                     initCountdown();
-                }, 1800000); // 30 minutos = 1,800,000 ms
+                }, 600000); // 10 minutos = 600,000 ms
             }
         }
         
         // Iniciar el contador con el evento actual (segunda sesión)
         initCountdown();
+        
+        // Actualizar fecha y hora cada segundo
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
     </script>
 </body>
 </html>
