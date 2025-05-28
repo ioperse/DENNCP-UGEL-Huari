@@ -157,6 +157,21 @@
             color: white;
         }
         
+        #final-message {
+            display: none;
+            font-size: 36px;
+            font-weight: bold;
+            margin: 30px 0;
+            color: #1a3a7a;
+            animation: pulse 0.5s infinite alternate;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            padding: 15px;
+            border-radius: 10px;
+            border: 3px solid #1a3a7a;
+            color: white;
+        }
+        
         @keyframes pulse {
             from { transform: scale(1); }
             to { transform: scale(1.1); }
@@ -306,7 +321,7 @@
             <p style="font-size: 20px; font-weight: bold; color: #1a3a7a;">FORTALECIMIENTO DE COMPETENCIAS DIGITALES PARA DOCENTES</p>
             
             <div class="event-date" id="currentEventDate">
-                🗓️ Sesión 2: 23 de Mayo 2025 - 🕒 15:00 horas
+                🗓️ Sesión 3: 30 de Mayo 2025 - 🕒 15:00 horas
             </div>
             
             <div class="countdown">
@@ -330,6 +345,10 @@
             
             <div id="message">
                 ¡LA SESIÓN HA COMENZADO! BIENVENIDOS
+            </div>
+            
+            <div id="final-message">
+                EL CURSO HA CONCLUIDO. ¡GRACIAS POR PARTICIPAR!
             </div>
         </div>
         
@@ -361,13 +380,13 @@
                         <td>Uso pedagógico del Genially para elaborar evaluaciones lúdicas con inteligencia artificial IA</td>
                         <td>Primaria/Secundaria</td>
                     </tr>
-                    <tr class="current-event">
+                    <tr>
                         <td>23/05/2025</td>
                         <td>15:00</td>
                         <td>Uso pedagógico del Slidesgo para elaborar presentaciones y organizadores gráficos orientado a potenciar las competencias comunicativas</td>
                         <td>Primaria/Secundaria</td>
                     </tr>
-                    <tr>
+                    <tr class="current-event">
                         <td>30/05/2025</td>
                         <td>15:00</td>
                         <td>Uso pedagógico de la app Scratch para desarrollar competencias comunicativas orientada a la creación de historietas y cuentos</td>
@@ -537,8 +556,10 @@
         const minutesEl = document.getElementById('minutes');
         const secondsEl = document.getElementById('seconds');
         const messageEl = document.getElementById('message');
+        const finalMessageEl = document.getElementById('final-message');
         const currentEventDateEl = document.getElementById('currentEventDate');
         const scheduleTable = document.getElementById('scheduleTable');
+        const countdownContainer = document.querySelector('.countdown');
         
         // Datos del cronograma
         const schedule = [
@@ -553,7 +574,7 @@
             { date: '09/07/2025', time: '15:00', title: 'Sesión 9: Uso pedagógico de Khanmigo para crear actividades orientadas al desarrollo de los aprendizajes de los estudiantes' }
         ];
         
-        let currentEventIndex = 1; // Comenzamos con la segunda sesión (23/05)
+        let currentEventIndex = 2; // Comenzamos con la tercera sesión (30/05)
         let countdownInterval;
         let targetDate;
         let resetTimeout;
@@ -611,10 +632,9 @@
             // Si hemos pasado todos los eventos
             if (currentEventIndex >= schedule.length) {
                 currentEventDateEl.textContent = "¡Todas las sesiones de capacitación han concluido!";
-                daysEl.textContent = '00';
-                hoursEl.textContent = '00';
-                minutesEl.textContent = '00';
-                secondsEl.textContent = '00';
+                countdownContainer.style.display = 'none';
+                messageEl.style.display = 'none';
+                finalMessageEl.style.display = 'block';
                 return;
             }
             
@@ -628,6 +648,11 @@
             if (currentEventIndex < rows.length) {
                 rows[currentEventIndex].classList.add('current-event');
             }
+            
+            // Asegurarse de que los elementos de cuenta regresiva son visibles
+            countdownContainer.style.display = 'flex';
+            messageEl.style.display = 'none';
+            finalMessageEl.style.display = 'none';
             
             // Iniciar el contador
             updateCountdown();
@@ -683,7 +708,7 @@
                     rows[currentEventIndex].classList.add('in-progress');
                 }
                 
-                // 10 minutos después del inicio del evento, reiniciar el contador para el siguiente evento
+                // 30 minutos después del inicio del evento, reiniciar el contador para el siguiente evento
                 resetTimeout = setTimeout(() => {
                     messageEl.style.display = 'none';
                     isEventInProgress = false;
@@ -691,11 +716,11 @@
                     
                     // Reiniciar el contador para el siguiente evento
                     initCountdown();
-                }, 600000); // 10 minutos = 600,000 ms
+                }, 1800000); // 30 minutos = 1,800,000 ms
             }
         }
         
-        // Iniciar el contador con el evento actual (segunda sesión)
+        // Iniciar el contador con el evento actual (tercera sesión)
         initCountdown();
         
         // Actualizar fecha y hora cada segundo
