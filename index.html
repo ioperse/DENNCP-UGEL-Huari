@@ -412,7 +412,7 @@
             <p style="font-size: 20px; font-weight: bold; color: var(--secondary-color);">FORTALECIMIENTO DE COMPETENCIAS DIGITALES PARA DOCENTES</p>
             
             <div class="event-date" id="currentEventDate">
-                🗓️ Sesión 4: 04 de Junio 2025 - 🕒 15:00 horas
+                🗓️ Sesión 5: 11 de Junio 2025 - 🕒 15:00 horas
             </div>
             
             <div class="countdown">
@@ -489,35 +489,11 @@
         // Datos del cronograma (fuente única de verdad)
         const scheduleData = [
             { 
-                date: '16/05/2025', 
-                time: '15:00', 
-                topic: 'Uso pedagógico del Genially para elaborar evaluaciones lúdicas con inteligencia artificial IA',
-                level: 'Primaria/Secundaria'
-            },
-            { 
-                date: '23/05/2025', 
-                time: '15:00', 
-                topic: 'Uso pedagógico del Slidesgo para elaborar presentaciones y organizadores gráficos orientado a potenciar las competencias comunicativas',
-                level: 'Primaria/Secundaria'
-            },
-            { 
-                date: '30/05/2025', 
-                time: '15:00', 
-                topic: 'Uso pedagógico de la app Scratch para desarrollar competencias comunicativas orientada a la creación de historietas y cuentos',
-                level: 'Primaria/Secundaria'
-            },
-            { 
-                date: '04/06/2025', 
-                time: '15:00', 
-                topic: 'Uso pedagógico del aplicativo Phet Interactive para el desarrollo de las competencias matemáticas y/o ciencia tecnología',
-                level: 'Primaria/Secundaria',
-                current: true // Esta es la sesión actual (la más próxima)
-            },
-            { 
                 date: '11/06/2025', 
                 time: '15:00', 
                 topic: 'Uso pedagógico de Canva en la creación de presentaciones de audio y video con IA para dinamizar las sesiones de aprendizaje',
-                level: 'Primaria/Secundaria'
+                level: 'Primaria/Secundaria',
+                current: true // Sesión 5 actual
             },
             { 
                 date: '18/06/2025', 
@@ -598,7 +574,7 @@
                 }
                 
                 row.innerHTML = `
-                    <td>${index + 1}</td>
+                    <td>${index + 5}</td> <!-- Comenzando desde sesión 5 -->
                     <td>${event.date}</td>
                     <td>${event.time}</td>
                     <td>${event.topic}</td>
@@ -649,12 +625,6 @@
             clearInterval(countdownInterval);
             clearTimeout(resetTimeout);
             
-            // Mostrar mensaje de bienvenida al inicio de cada evento (durante 30 segundos)
-            messageEl.style.display = 'block';
-            setTimeout(() => {
-                messageEl.style.display = 'none';
-            }, 30000); // 30 segundos
-            
             // Si hemos pasado todos los eventos
             if (currentEventIndex >= scheduleData.length) {
                 currentEventDateEl.textContent = "¡Todas las sesiones de capacitación han concluido!";
@@ -674,7 +644,7 @@
             }
             
             // Actualizar texto del evento actual
-            currentEventDateEl.innerHTML = `🗓️ Sesión ${currentEventIndex + 1}: ${currentEvent.date} - 🕒 ${currentEvent.time} horas | ${currentEvent.topic}`;
+            currentEventDateEl.innerHTML = `🗓️ Sesión ${currentEventIndex + 5}: ${currentEvent.date} - 🕒 ${currentEvent.time} horas | ${currentEvent.topic}`;
             
             // Actualizar clases en la tabla
             const rows = scheduleTable.querySelectorAll('tr');
@@ -733,7 +703,7 @@
                 });
             }
             
-            // Manejar cuando el evento ha comenzado
+            // Manejar cuando el evento ha comenzado (entre 15:00 y 15:30)
             if (distance < 0 && !isEventInProgress) {
                 // El evento ha comenzado
                 isEventInProgress = true;
@@ -754,7 +724,7 @@
                     rows[currentEventIndex].classList.add('in-progress');
                 }
                 
-                // 30 minutos después del inicio del evento, pasar a la siguiente sesión
+                // 30 minutos después del inicio del evento (a las 15:30), pasar a la siguiente sesión
                 resetTimeout = setTimeout(() => {
                     messageEl.style.display = 'none';
                     isEventInProgress = false;
@@ -811,7 +781,7 @@
         // Generar la tabla de horarios al cargar
         generateScheduleTable();
         
-        // Iniciar el contador con el evento actual (sesión 4)
+        // Iniciar el contador con el evento actual (sesión 5)
         initCountdown();
         
         // Actualizar fecha y hora cada segundo
