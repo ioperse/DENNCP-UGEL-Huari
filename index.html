@@ -384,6 +384,18 @@
         <div class="banner-text">UGEL Huari impulsando el fortalecimiento de competencias digitales docentes | Transformando la educación con tecnología | Juntos por una educación de calidad</div>
     </div>
 
+    <!-- Audio de fondo (oculto) -->
+    <audio id="backgroundMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+
+    <!-- Efecto de sonido para interacción -->
+    <audio id="clickSound">
+        <source src="https://www.soundjay.com/buttons/sounds/button-09.mp3" type="audio/mpeg">
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+
     <div class="main-container">
         <!-- Contenedor para fecha y hora actual -->
         <div class="container datetime-container">
@@ -557,6 +569,10 @@
         const currentEventDateEl = document.getElementById('currentEventDate');
         const scheduleTable = document.getElementById('scheduleTable').querySelector('tbody');
         const countdownContainer = document.querySelector('.countdown');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const clickSound = document.getElementById('clickSound');
+        const audioControl = document.getElementById('audioControl');
+        const zoomLink = document.getElementById('zoomLink');
         
         // ============== VARIABLES DE ESTADO ==============
         let currentEventIndex = scheduleData.findIndex(event => event.current) || 0;
@@ -564,6 +580,7 @@
         let targetDate;
         let resetTimeout;
         let isEventInProgress = false;
+        let isMusicPlaying = false;
         
         // ============== FUNCIONES PRINCIPALES ==============
         
@@ -631,6 +648,12 @@
             // Limpiar intervalos y timeouts anteriores
             clearInterval(countdownInterval);
             clearTimeout(resetTimeout);
+            
+            // Mostrar mensaje de bienvenida al inicio de cada evento (durante 30 segundos)
+            messageEl.style.display = 'block';
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 30000); // 30 segundos
             
             // Si hemos pasado todos los eventos
             if (currentEventIndex >= scheduleData.length) {
@@ -750,6 +773,39 @@
             }
         }
         
+        /**
+         * Controla la música de fondo
+         */
+        function toggleBackgroundMusic() {
+            if (isMusicPlaying) {
+                backgroundMusic.pause();
+                audioControl.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            } else {
+                backgroundMusic.play();
+                audioControl.innerHTML = '<i class="fas fa-volume-up"></i>';
+            }
+            isMusicPlaying = !isMusicPlaying;
+        }
+        
+        /**
+         * Reproduce sonido de clic
+         */
+        function playClickSound() {
+            clickSound.currentTime = 0;
+            clickSound.play();
+        }
+        
+        // ============== EVENT LISTENERS ==============
+        
+        // Control de música de fondo
+        audioControl.addEventListener('click', () => {
+            playClickSound();
+            toggleBackgroundMusic();
+        });
+        
+        // Sonido al interactuar con el enlace Zoom
+        zoomLink.addEventListener('click', playClickSound);
+        
         // ============== INICIALIZACIÓN ==============
         
         // Generar la tabla de horarios al cargar
@@ -761,6 +817,20 @@
         // Actualizar fecha y hora cada segundo
         updateDateTime();
         setInterval(updateDateTime, 1000);
+        
+        // Intentar reproducir música automáticamente (puede que no funcione en algunos navegadores)
+        document.addEventListener('click', function initialMusicPlay() {
+            if (!isMusicPlaying) {
+                backgroundMusic.volume = 0.3; // Volumen bajo
+                backgroundMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    audioControl.innerHTML = '<i class="fas fa-volume-up"></i>';
+                }).catch(e => {
+                    console.log("La reproducción automática fue bloqueada:", e);
+                });
+            }
+            document.removeEventListener('click', initialMusicPlay);
+        });
     </script>
 </body>
 </html>
