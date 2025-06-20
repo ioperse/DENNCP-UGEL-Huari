@@ -648,24 +648,31 @@
         }
         
         /**
-         * Inicializa el contador regresivo para el evento actual (sesión 6)
+         * Inicializa el contador regresivo para el evento actual
          */
         function initCountdown() {
             // Limpiar intervalos y timeouts anteriores
             clearInterval(countdownInterval);
             clearTimeout(resetTimeout);
             
-            // Configurar la fecha objetivo para la sesión 6 (18/06/2025)
-            targetDate = new Date('2025-06-18T15:00:00-05:00');
+            // Obtener el evento actual
+            const currentEvent = scheduleData[currentEventIndex];
+            
+            // Parsear la fecha del evento (formato dd/mm/yyyy)
+            const [day, month, year] = currentEvent.date.split('/');
+            const [hours, minutes] = currentEvent.time.split(':');
+            
+            // Configurar la fecha objetivo
+            targetDate = new Date(`${year}-${month}-${day}T${hours}:${minutes}:00-05:00`);
             
             // Validar fecha
             if (isNaN(targetDate.getTime())) {
-                console.error('Fecha inválida para la sesión 6');
+                console.error('Fecha inválida para la sesión', currentEventIndex + 1);
                 return;
             }
             
-            // Actualizar texto del evento actual (sesión 6)
-            currentEventDateEl.innerHTML = `🗓️ Sesión 6: 18/06/2025 - 🕒 15:00 horas | Uso pedagógico de la herramienta de inteligencia artificial (IA) prompts para el desarrollo de las competencias comunicativas`;
+            // Actualizar texto del evento actual
+            currentEventDateEl.innerHTML = `🗓️ Sesión ${currentEventIndex + 5}: ${currentEvent.date} - 🕒 ${currentEvent.time} horas | ${currentEvent.topic}`;
             
             // Asegurarse de que los elementos de cuenta regresiva son visibles
             countdownContainer.style.display = 'flex';
@@ -741,52 +748,29 @@
                     messageEl.style.display = 'none';
                     isEventInProgress = false;
                     
-                    // Marcar la sesión 6 como completada
+                    // Marcar la sesión actual como completada
                     scheduleData[currentEventIndex].completed = true;
                     scheduleData[currentEventIndex].status = 'Completada';
+                    scheduleData[currentEventIndex].current = false;
+                    
+                    // Pasar a la siguiente sesión si existe
+                    if (currentEventIndex < scheduleData.length - 1) {
+                        currentEventIndex++;
+                        scheduleData[currentEventIndex].current = true;
+                        scheduleData[currentEventIndex].status = 'En curso';
+                    } else {
+                        // Mostrar mensaje final si no hay más sesiones
+                        finalMessageEl.style.display = 'block';
+                        return;
+                    }
                     
                     // Actualizar la tabla
                     generateScheduleTable();
                     
-                    // Pasar a la siguiente sesión (7)
-                    currentEventIndex = 2; // Índice de la sesión 7
-                    scheduleData[currentEventIndex].current = true;
-                    scheduleData[currentEventIndex].status = 'En curso';
-                    
-                    // Actualizar la tabla nuevamente
-                    generateScheduleTable();
-                    
-                    // Actualizar el contador para la sesión 7
-                    initCountdownForNextSession();
+                    // Iniciar contador para la nueva sesión
+                    initCountdown();
                 }, 1800000); // 30 minutos = 1,800,000 ms
             }
-        }
-        
-        /**
-         * Inicializa el contador para la siguiente sesión (sesión 7)
-         */
-        function initCountdownForNextSession() {
-            clearInterval(countdownInterval);
-            clearTimeout(resetTimeout);
-            
-            // Configurar la fecha objetivo para la sesión 7 (25/06/2025)
-            targetDate = new Date('2025-06-25T15:00:00-05:00');
-            
-            if (isNaN(targetDate.getTime())) {
-                console.error('Fecha inválida para la sesión 7');
-                return;
-            }
-            
-            // Actualizar texto del evento actual (sesión 7)
-            currentEventDateEl.innerHTML = `🗓️ Sesión 7: 25/06/2025 - 🕒 15:00 horas | Uso pedagógico de la APP Octostudio para producción de textos`;
-            
-            countdownContainer.style.display = 'flex';
-            messageEl.style.display = 'none';
-            finalMessageEl.style.display = 'none';
-            isEventInProgress = false;
-            
-            updateCountdown();
-            countdownInterval = setInterval(updateCountdown, 1000);
         }
         
         /**
@@ -827,7 +811,7 @@
         // Generar la tabla de horarios al cargar
         generateScheduleTable();
         
-        // Iniciar el contador con la sesión 6 (18/06)
+        // Iniciar el contador con la sesión actual
         initCountdown();
         
         // Actualizar fecha y hora cada segundo
