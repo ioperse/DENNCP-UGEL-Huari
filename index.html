@@ -510,14 +510,15 @@
                 time: '15:00', 
                 topic: 'Uso pedagógico de la herramienta de inteligencia artificial (IA) prompts para el desarrollo de las competencias comunicativas',
                 level: 'Primaria/Secundaria',
-                current: true,
-                status: 'En curso'
+                completed: false,
+                status: 'Pendiente'
             },
             { 
                 date: '25/06/2025', 
                 time: '15:00', 
                 topic: 'Uso pedagógico de la APP Octostudio para producción de textos',
                 level: 'Primaria/Secundaria',
+                completed: false,
                 status: 'Pendiente'
             },
             { 
@@ -525,6 +526,7 @@
                 time: '15:00', 
                 topic: 'Uso pedagógico de Rodocodo y Octostudio para el logro de competencias comunicativas',
                 level: 'Primaria/Secundaria',
+                completed: false,
                 status: 'Pendiente'
             },
             { 
@@ -532,6 +534,7 @@
                 time: '15:00', 
                 topic: 'Uso pedagógico de Khanmigo para crear actividades orientadas al desarrollo de los aprendizajes de los estudiantes',
                 level: 'Primaria/Secundaria',
+                completed: false,
                 status: 'Pendiente'
             },
             { 
@@ -539,6 +542,7 @@
                 time: '15:00', 
                 topic: 'Taller sobre Scratch: Programación creativa para el desarrollo del pensamiento computacional',
                 level: 'Primaria/Secundaria',
+                completed: false,
                 status: 'Pendiente'
             }
         ];
@@ -573,7 +577,7 @@
         const zoomLink = document.getElementById('zoomLink');
         
         // ============== VARIABLES DE ESTADO ==============
-        let currentEventIndex = scheduleData.findIndex(event => event.current) || 1; // Sesión 6 es la actual (índice 1)
+        let currentEventIndex = -1;
         let countdownInterval;
         let targetDate;
         let resetTimeout;
@@ -581,6 +585,32 @@
         let isMusicPlaying = false;
         
         // ============== FUNCIONES PRINCIPALES ==============
+        
+        /**
+         * Determina cuál es la sesión actual basada en la fecha del sistema
+         */
+        function determineCurrentSession() {
+            const now = new Date();
+            
+            // Buscar la primera sesión que no esté completada y cuya fecha sea hoy o en el futuro
+            for (let i = 0; i < scheduleData.length; i++) {
+                const event = scheduleData[i];
+                const [day, month, year] = event.date.split('/');
+                const [hours, minutes] = event.time.split(':');
+                const eventDate = new Date(`${year}-${month}-${day}T${hours}:${minutes}:00-05:00`);
+                
+                if (!event.completed && (eventDate >= now || i === scheduleData.length - 1)) {
+                    // Marcar solo esta sesión como actual
+                    scheduleData.forEach((e, idx) => {
+                        e.current = (idx === i);
+                        e.status = (idx === i) ? 'En curso' : e.status;
+                    });
+                    return i;
+                }
+            }
+            
+            return scheduleData.length - 1; // Por defecto, la última sesión
+        }
         
         /**
          * Genera la tabla de horarios dinámicamente
@@ -594,10 +624,7 @@
                 // Marcar sesión actual
                 if (event.current) {
                     row.classList.add('current-event');
-                }
-                
-                // Marcar sesiones completadas
-                if (event.completed) {
+                } else if (event.completed) {
                     row.classList.add('completed-session');
                 }
                 
@@ -608,7 +635,7 @@
                     <td>${event.time}</td>
                     <td>${event.topic}</td>
                     <td>${event.level}</td>
-                    <td>${event.status}</td>
+                    <td>${event.status || 'Pendiente'}</td>
                 `;
                 
                 scheduleTable.appendChild(row);
@@ -655,7 +682,8 @@
             clearInterval(countdownInterval);
             clearTimeout(resetTimeout);
             
-            // Obtener el evento actual
+            // Determinar la sesión actual basada en la fecha
+            currentEventIndex = determineCurrentSession();
             const currentEvent = scheduleData[currentEventIndex];
             
             // Parsear la fecha del evento (formato dd/mm/yyyy)
@@ -753,13 +781,8 @@
                     scheduleData[currentEventIndex].status = 'Completada';
                     scheduleData[currentEventIndex].current = false;
                     
-                    // Pasar a la siguiente sesión si existe
-                    if (currentEventIndex < scheduleData.length - 1) {
-                        currentEventIndex++;
-                        scheduleData[currentEventIndex].current = true;
-                        scheduleData[currentEventIndex].status = 'En curso';
-                    } else {
-                        // Mostrar mensaje final si no hay más sesiones
+                    // Si es la última sesión, mostrar mensaje final
+                    if (currentEventIndex >= scheduleData.length - 1) {
                         finalMessageEl.style.display = 'block';
                         return;
                     }
